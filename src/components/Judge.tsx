@@ -13,8 +13,8 @@ import {
   RpcCallErrorStatus,
 } from "./interfaces";
 import { fetchBetInfo } from "./operations";
-import { SelectBetForm } from "./SelectBetForm";
 import { PageHeading } from "./PageHeading";
+import { SelectBetForm } from "./SelectBetForm";
 
 const statusTypographyvariant = "subtitle2";
 
@@ -32,7 +32,11 @@ export const Judge = (props: JudgePropsT) => {
     //if txbeingsent changed from something to nothing then maybe
     //the bet status changed, so refetch
     const func = async () => {
-      const newBetInfo = await fetchBetInfo(betId, props.state.provider, props.state.contractAddress);
+      const newBetInfo = await fetchBetInfo(
+        betId,
+        props.state.provider,
+        props.state.contractAddress
+      );
       setBetInfo({ ...newBetInfo });
     };
     func();
@@ -76,7 +80,7 @@ export const Judge = (props: JudgePropsT) => {
   if (betId >= 0)
     if (betInfo.error.status === RpcCallErrorStatus.UNDEFINED)
       isFetching = true;
-    else if (betInfo.error.status === RpcCallErrorStatus.RPC_ERROR)
+    else if (betInfo.error.status === RpcCallErrorStatus.RECOGNIZED_RPC_ERROR)
       isRpcErr = true;
     else if (betInfo.error.status === RpcCallErrorStatus.OTHER_ERROR)
       isOtherErr = true;
@@ -116,7 +120,8 @@ export const Judge = (props: JudgePropsT) => {
           const func = async () => {
             const newBetInfo = await fetchBetInfo(
               +vals.betId,
-              props.state.provider, props.state.contractAddress
+              props.state.provider,
+              props.state.contractAddress
             );
             // PITFALL - have to use the spread operator because otherwise it doesn't rerender
             // it looks like the above call always returns the same reference - that would explain

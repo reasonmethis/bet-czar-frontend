@@ -5,25 +5,27 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
-  RouterProvider,
+  RouterProvider
 } from "react-router-dom";
 
-import { useSnackbar } from "notistack";
+import { useSnackbar, VariantType } from "notistack";
 
 import "./App.css";
+import {
+  CreateBetFormValsT,
+  DepositValsT,
+  JudgeValsT,
+  RpcCallErrorT,
+  WithdrawValsT
+} from "./components/interfaces";
 import { Action, stateInit, stateReducer } from "./StateReducer";
 import { shortenHash } from "./utils/utils";
+import {parseRpcCallError} from "./components/operations"
 
 import { CreateBetForm } from "./components/CreateBetForm";
 import { Deposit } from "./components/Deposit";
 import Header from "./components/Header";
 import { Home } from "./components/Home";
-import {
-  CreateBetFormValsT,
-  DepositValsT,
-  JudgeValsT,
-  WithdrawValsT,
-} from "./components/interfaces";
 import { Judge } from "./components/Judge";
 import { Withdraw } from "./components/Withdraw";
 
@@ -329,7 +331,7 @@ function App() {
           autoHideDuration: cfg.DUR_SNACKBAR,
           variant: "error",
         });
-        throw new Error("Transaction failed");
+        throw new Error("Transaction failed, receipt has status = 0");
       }
 
       // If we got here, the transaction was successful, so you may want to
@@ -342,31 +344,19 @@ function App() {
     } catch (error) {
       // We check the error code to see if this error was produced because the
       // user rejected a tx. If that's the case, we do nothing.
-      const errSt = getRpcErrorMessage(error);
-      if (errSt === cfg.ERR_ST_TX_REJECTED_BY_USER) return;
-      // Other errors are logged and stored in the Dapp's state. This is used to
-      // show them to the user, and for debugging.
-      console.error(error);
-      dispatchState({ type: Action.SET_TX_ERR, payload: errSt });
+      const errObj = parseRpcCallError(error);
+    
+      enqueueSnackbar(errObj.userMsg, {variant: errObj.level as VariantType})
+      dispatchState({ type: Action.SET_TX_ERR, payload: errObj.fullMsg });
     } finally {
+      console.log("tx attempt done")
+
       // If we leave the try/catch, we aren't sending a tx anymore, so we clear
       // this part of the state.
       dispatchState({ type: Action.SET_TX_BEINGSENT, payload: undefined });
       //Here, we update the user's balance.
       await updateBalance();
     }
-  };
-
-  // This is an utility method that turns an RPC error into a human readable
-  // message.
-  const getRpcErrorMessage = (error: any): string => {
-    if (error.code === cfg.ERROR_CODE_TX_REJECTED_BY_USER) {
-      return cfg.ERR_ST_TX_REJECTED_BY_USER;
-    }
-    if (error.data) {
-      return error.data.message;
-    }
-    return error.message;
   };
 
   //We define the route structure
@@ -376,6 +366,7 @@ function App() {
         path="/"
         element={<Header state={state} connectWallet={connectWallet} />}
       >
+        <Route path="*" element={<Home state={state} />} />
         {/* <Route index loader={homeLoader} element={<Home />} />  */}
         <Route index element={<Home state={state} />} />
         <Route

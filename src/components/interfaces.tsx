@@ -25,12 +25,12 @@ export type DepositPropsT = {
   state: IState;
   onSubmit: (vals: DepositValsT) => void;
 };
-  
+
 export type WithdrawValsT = {
   betId: string;
   isBettor1: boolean;
-  isWon: boolean //then use sendWinnings 
-  isCancelled: boolean //then sendRefund1/2, else recallDeposit
+  isWon: boolean; //then use sendWinnings
+  isCancelled: boolean; //then sendRefund1/2, else recallDeposit
 };
 
 export type WithdrawPropsT = {
@@ -41,7 +41,7 @@ export type WithdrawPropsT = {
 export type JudgeValsT = {
   betId: string;
   isJudge: boolean;
-  winner: 0 | 1 | 2
+  winner: 0 | 1 | 2;
 };
 
 export type JudgePropsT = {
@@ -96,13 +96,19 @@ export enum BetStatus {
 export enum RpcCallErrorStatus {
   UNDEFINED,
   NO_ERROR,
-  RPC_ERROR,
+  RECOGNIZED_RPC_ERROR,
   OTHER_ERROR,
 }
 
+export type TxCodeT = { code: string; userMsg: string; level: string };
+
 export const RpcCallErrorInitVals = {
   status: RpcCallErrorStatus.UNDEFINED,
-  msg: "",
+  code: "",
+  method: "",
+  fullMsg: "",
+  userMsg: "",
+  level: "",
 };
 
 export type RpcCallErrorT = typeof RpcCallErrorInitVals;

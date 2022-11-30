@@ -69,7 +69,7 @@ export const Deposit = (props: DepositPropsT) => {
   if (betId >= 0)
     if (betInfo.error.status === RpcCallErrorStatus.UNDEFINED)
       isFetching = true;
-    else if (betInfo.error.status === RpcCallErrorStatus.RPC_ERROR)
+    else if (betInfo.error.status === RpcCallErrorStatus.RECOGNIZED_RPC_ERROR)
       isRpcErr = true;
     else if (betInfo.error.status === RpcCallErrorStatus.OTHER_ERROR)
       isOtherErr = true;

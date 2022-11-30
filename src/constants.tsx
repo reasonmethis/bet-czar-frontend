@@ -20,6 +20,9 @@ export const supportedNetworks = [
 export const DT_POLLING_IN_MS = 20000;
 export const DUR_SNACKBAR = 15000;
 
-// This is an error code that indicates that the user canceled a transaction
-export const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
-export const ERR_ST_TX_REJECTED_BY_USER = "Transaction was rejected by user";
+export const txCodes = [
+    {code: "ACTION_REJECTED", userMsg: "Tx rejected by user", level:"info"},
+    {code: "INSUFFICIENT_FUNDS", userMsg: "Insufficient balance for tx", level:"error"},
+    {code: "ACTION_REJECTED", userMsg: "Tx rejected by user", level:"info"},
+]
+
