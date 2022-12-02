@@ -20,7 +20,7 @@ export function NoWalletMsg({ isOpen, setOpen }: NoWalletMsgPropsT) {
     <>
       <Dialog
         fullWidth={false}
-        //maxWidth={maxWidth}
+        sx={{"& .MuiPaper-root":{borderRadius:"14px"}}}
         open={isOpen}
         onClose={handleClose}
       >

@@ -30,6 +30,8 @@ import { roundAmt, shortenHash } from "../utils/utils";
 import { navigationLinks } from "../constants";
 import { NoWalletMsg } from "./NoWalletMsg";
 
+//locked 8fc9f8, 5a7da3:  185, 95, 137 b95f89 84a98c ef798a
+//locked 90caf9, 121212: f87575 ed254e de3c4b 990033
 const darkTheme = createTheme({
   palette: {
     mode: "dark",

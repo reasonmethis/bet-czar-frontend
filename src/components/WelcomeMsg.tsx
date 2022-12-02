@@ -36,7 +36,7 @@ export function WelcomeMsg({ sstate }: WelcomeMsgPropsT) {
     <>
       <Dialog
         fullWidth={false}
-        //maxWidth={maxWidth}
+        sx={{"& .MuiPaper-root":{borderRadius:"14px"}}}
         open={!nomore && sstate.val.welcomeState.includes("SHW")}
         onClose={handleClose}
       >
