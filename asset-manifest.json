@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/betczar_frontend/static/css/main.8977174b.css",
-    "main.js": "/betczar_frontend/static/js/main.6f640aa6.js",
+    "main.js": "/betczar_frontend/static/js/main.c8bd70e0.js",
     "static/js/787.4eae930c.chunk.js": "/betczar_frontend/static/js/787.4eae930c.chunk.js",
     "static/media/roboto-all-500-normal.woff": "/betczar_frontend/static/media/roboto-all-500-normal.0ab669b7a0d19b178f57.woff",
     "static/media/roboto-all-700-normal.woff": "/betczar_frontend/static/media/roboto-all-700-normal.a457fde362a540fcadff.woff",
@@ -37,11 +37,11 @@
     "static/media/roboto-greek-ext-700-normal.woff2": "/betczar_frontend/static/media/roboto-greek-ext-700-normal.bd9854c751441ccc1a70.woff2",
     "index.html": "/betczar_frontend/index.html",
     "main.8977174b.css.map": "/betczar_frontend/static/css/main.8977174b.css.map",
-    "main.6f640aa6.js.map": "/betczar_frontend/static/js/main.6f640aa6.js.map",
+    "main.c8bd70e0.js.map": "/betczar_frontend/static/js/main.c8bd70e0.js.map",
     "787.4eae930c.chunk.js.map": "/betczar_frontend/static/js/787.4eae930c.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.8977174b.css",
-    "static/js/main.6f640aa6.js"
+    "static/js/main.c8bd70e0.js"
   ]
 }
