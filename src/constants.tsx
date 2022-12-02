@@ -43,19 +43,19 @@ export const txCodes = [
 export const welcomeMsgs = {
   normal: [
     [
-      "B:What is it?",
+      "P:What is it?",
       "N: Bet Czar is a decentralized App to create and enforce any bets between two parties.",
     ],
     [
-      "B:Toy example: ",
+      "P:Toy example: ",
       "N: say you bet your friend Bob $100 that you can teach your cat to do a somersault in two weeks. Unfortunately Bob is flaky, so you need some way to make sure he will pay up. You can then use Bet Czar to create a bet enforced by a smart contract.",
     ],
     [
-      "B:How would that work?",
+      "P:How would that work?",
       "N: You both deposit your wagers into escrow and designate your other friend Judy to be the judge - in case you and Bob can't agree who won. The winner can withdraw the whole amount  whenever (a) one of you concedes defeat OR (b) Judy designates the winner (or calls a tie).",
     ],
     [
-      "B:Can Bet Czar steal our money? ",
+      "P:Can Bet Czar steal our money? ",
       'N: No, the contract is built with no "superuser", only the bet participants can withdraw the money in the escrow. The contract code can be examined, it is verified on Etherscan. ',
     ],
   ],
@@ -65,19 +65,19 @@ export const connectBtnMsgs = {
   nowallet: [
     //["N: You need the Metamask wallet to create and manage Bets."],
     [
-      "B: What is that?",
+      "P: What is that?",
       "N: Metamask is by far the most widely used crypto wallet to interact with decentralized Apps like this one. It serves as the middleman between you and the App, so that you can authorize transactions without telling the App your private information.",
     ],
     [
-      "B:How do I get it?",
+      "P:How do I get it?",
       "N: You can find it in the Chrome extension store. You can then add it to your Chrome, Firefox, or Brave browser.",
     ],
     [
-      "B: And then?",
+      "P: And then?",
       'N: If you are new to crypto this might seem a bit overwhelming, but it\'s actually not so bad: the next step would be to get some free "fake" ETH from a Goerli faucet and you will be ready to fully test out this App.',
     ],
     [
-      "B:Can I still explore it without Metamask?",
+      "P:Can I still explore it without Metamask?",
       "N: You can still see the various pages and get a rough sense of their functionality. But without a connection to the blockchain, you won't be able to see how to interact with Bets."
       //"N: Yes, but you won't be able to create and manage Bets. You can still query the status of others' Bets on Goerli (it's a test network for Ethereum). To do that, wherever it asks for a Bet id, just enter 0, 1, or 2.",
     ],

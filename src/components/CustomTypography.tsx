@@ -11,7 +11,11 @@ function CustomTypography({text}: CustomTypographyPropsT) {
             return (
                 <Typography component="span" fontWeight="bold">{txt}</Typography>
             )
-        default:
+            case "P":
+                return (
+                    <Typography component="span" color="primary">{txt}</Typography>
+                )
+            default:
             return (
                 <Typography component="span" >{txt}</Typography>
             )
