@@ -6,8 +6,9 @@ import { Box, Typography } from "@mui/material";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
-import { IState } from "../StateReducer";
+import { IState, StateBundleT, TAction } from "../StateReducer";
 import { PageHeading } from "./PageHeading";
+import { WelcomeMsg } from "./WelcomeMsg";
 
 interface HomeLoaderData {
   date: string;
@@ -27,7 +28,7 @@ type BetListPropsT = {
 };
 
 type HomePropsT = {
-  state: IState;
+  sstate: StateBundleT
 };
 
 const OneBet = ({ event }: OneBetPropsT) => {
@@ -106,10 +107,12 @@ const BetList = ({ events }: BetListPropsT) => {
   );
 };
 
-export const Home = ({ state }: HomePropsT) => {
+export const Home = ({ sstate }: HomePropsT) => {
   //let data = useLoaderData() as HomeLoaderData;
+  const state = sstate.val
   return (
     <>
+      <WelcomeMsg sstate={sstate}></WelcomeMsg>
       <PageHeading text="Dashboard"></PageHeading>
       {!state.address ? (
         <Typography variant="subtitle1" color="text.secondary">

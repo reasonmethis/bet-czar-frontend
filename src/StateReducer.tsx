@@ -1,6 +1,8 @@
 import { ethers } from "ethers";
 import { AllBetsT } from "./components/interfaces";
 
+export type StateProviderT = ethers.providers.Web3Provider | ethers.providers.BaseProvider | undefined
+
 export enum Action {
   RESET,
   SET_NETWORK_ERR,
@@ -11,14 +13,16 @@ export enum Action {
   SET_TX_BEINGSENT,
   SET_TX_ERR,
   SET_ALL_BETS,
+  SET_WELCOME_STATE,
+  WELCOME_MSG_DISMISSED,
 }
 
 //Different actions have different payload types, so to strongly type
 //our action we use a union of several types using the "tagged union" pattern
 //see https://medium.com/codex/typescript-and-react-usereducer-943e4f8d1ad4 (counts
 //towards Medium's free limit)
-type TActionReset = {
-  type: Action.RESET;
+type TActionNoPayload = {
+  type: Action.RESET | Action.WELCOME_MSG_DISMISSED;
 };
 
 type TActionSetStringProperty = {
@@ -28,13 +32,14 @@ type TActionSetStringProperty = {
     | Action.SET_CONTRACT
     | Action.SET_BALANCE
     | Action.SET_TX_BEINGSENT
-    | Action.SET_TX_ERR;
+    | Action.SET_TX_ERR
+    | Action.SET_WELCOME_STATE;
   payload: string | undefined;
 };
 
 type TActionSetProvider = {
   type: Action.SET_PROVIDER;
-  payload: ethers.providers.Web3Provider | undefined;
+  payload: StateProviderT
 };
 
 type TActionSetAllBets = {
@@ -43,7 +48,7 @@ type TActionSetAllBets = {
 };
 
 export type TAction =
-  | TActionReset
+  | TActionNoPayload
   | TActionSetStringProperty
   | TActionSetProvider
   | TActionSetAllBets;
@@ -57,10 +62,11 @@ export interface IState {
   address: string | undefined;
   contractAddress: string | undefined;
   networkError: string | undefined;
-  provider: ethers.providers.Web3Provider | undefined;
+  provider:StateProviderT
   txBeingSent: string | undefined;
   txError: string | undefined;
   allBets: AllBetsT | undefined;
+  welcomeState: string;
 }
 
 export const stateInit: IState = {
@@ -72,6 +78,12 @@ export const stateInit: IState = {
   txBeingSent: undefined,
   txError: undefined,
   allBets: undefined,
+  welcomeState: "SHW ",
+};
+
+export type StateBundleT = {
+  val: IState;
+  dispatch: (x: TAction) => void;
 };
 
 export const stateReducer = (state: IState, action: TAction): IState => {
@@ -94,6 +106,10 @@ export const stateReducer = (state: IState, action: TAction): IState => {
       return { ...state, txError: action.payload };
     case Action.SET_ALL_BETS:
       return { ...state, allBets: action.payload };
+    case Action.SET_WELCOME_STATE:
+      return { ...state, welcomeState: action.payload ?? "" };
+    case Action.WELCOME_MSG_DISMISSED:
+      return { ...state, welcomeState: state.welcomeState.replace("SHW", "DSM")};
     default:
       return state;
   }

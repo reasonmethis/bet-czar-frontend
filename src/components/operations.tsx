@@ -11,9 +11,10 @@ import {
 } from "./interfaces";
 
 import * as cfg from "../constants";
+import { StateProviderT } from "../StateReducer";
 
-const getReadContractInstance = (
-  provider: ethers.providers.Web3Provider,
+export const getReadContractInstance = (
+  provider: ethers.providers.BaseProvider,
   contractAddress: string
 ) => new ethers.Contract(contractAddress, BetCzarArtifact.abi, provider);
 
@@ -42,7 +43,7 @@ export const parseRpcCallError = (error: any): RpcCallErrorT => {
 
 export const fetchBetInfo = async (
   betId: number,
-  provider: ethers.providers.Web3Provider | undefined,
+  provider: StateProviderT,
   contractAddress: string | undefined
 ) => {
   //let betInfo = BetInfoInitVals; //PITFALL - this, in combination with the

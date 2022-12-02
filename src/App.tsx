@@ -4,8 +4,9 @@ import { useEffect, useReducer, useRef, useState } from "react";
 import {
   createBrowserRouter,
   createRoutesFromElements,
+  Navigate,
   Route,
-  RouterProvider
+  RouterProvider,
 } from "react-router-dom";
 
 import { useSnackbar, VariantType } from "notistack";
@@ -15,12 +16,14 @@ import {
   CreateBetFormValsT,
   DepositValsT,
   JudgeValsT,
-  RpcCallErrorT,
-  WithdrawValsT
+  WithdrawValsT,
 } from "./components/interfaces";
-import { Action, stateInit, stateReducer } from "./StateReducer";
+import {
+  getReadContractInstance,
+  parseRpcCallError,
+} from "./components/operations";
+import { Action, StateBundleT, stateInit, stateReducer } from "./StateReducer";
 import { shortenHash } from "./utils/utils";
-import {parseRpcCallError} from "./components/operations"
 
 import { CreateBetForm } from "./components/CreateBetForm";
 import { Deposit } from "./components/Deposit";
@@ -45,19 +48,20 @@ if (import.meta.hot) {
   import.meta.hot.dispose(() => router.dispose());
 }
 */
-const Fallback = () => <h2>Loading BetCzar...</h2>;
 
 function App() {
   const [state, dispatchState] = useReducer(stateReducer, stateInit);
   const pollDataIntervalRef = useRef<NodeJS.Timer | undefined>();
   const [fetchingFlg, setFetchingFlg] = useState(false);
-
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
+  const sstate: StateBundleT = { val: state, dispatch: dispatchState };
 
   useEffect(() => {
     //we update balance only when fetchingFlg (a) changes (b) from false to true
     //(a) is accomplished via the dependency array, (b) - manually
-    console.log("ff", fetchingFlg, state.address, !!state.provider);
+
+    //console.log("fetchingflg", fetchingFlg, "addr", state.address);
     if (!state.address) {
       setFetchingFlg(false);
       //_stopPollingData()
@@ -65,9 +69,10 @@ function App() {
     }
     _ensurePollingData(); //temp, cuz it unmounts on recompile
     if (!fetchingFlg) return;
+
     updateBalance()
       .catch((err) => {
-        console.error(err);
+        console.log("error updating balance: ", err);
       })
       .finally(() => {
         setFetchingFlg(false);
@@ -88,35 +93,48 @@ function App() {
     //because if address is defined then provider is defined too -
     //they reset together.
     if (!state.address) return;
-    const balance = await state.provider!.getBalance(state.address);
-    //setFetchingFlg(false);
-    console.log(balance.toString());
+    let balSt: string;
+    try {
+      const balance = await state.provider!.getBalance(state.address);
+      balSt = ethers.utils.formatEther(balance);
+    } catch (e) {
+      balSt = "NA";
+    }
+
+    console.log("balance", balSt);
     dispatchState({
       type: Action.SET_BALANCE,
-      payload: ethers.utils.formatEther(balance),
+      payload: balSt,
     });
 
     //get events associated with user's address
-    const betCzar = getContractInstance();
+    console.log("getReadContractInstance");
+    const betCzar = getReadContractInstance(
+      state.provider!,
+      state.contractAddress!
+    );
+    console.log("got");
     const filter1 = betCzar.filters.BetCreated(null, state.address, null, null);
     const filter2 = betCzar.filters.BetCreated(null, null, state.address, null);
     const filter3 = betCzar.filters.BetCreated(null, null, null, state.address);
+    console.log("filters done");
     const promises = [filter1, filter2, filter3].map((f) =>
-      betCzar.queryFilter(f)
+      betCzar.queryFilter(f, 8000000)
     );
     const events = await Promise.all(promises);
-    console.log(events);
+    console.log(events.length, " user's bets");
     //save events in state
     dispatchState({ type: Action.SET_ALL_BETS, payload: events });
   };
 
   // Check if we are on a supported network
-  const checkNetwork = () => {
-    console.log("network:", window.ethereum.networkVersion);
+  const checkNetworkAndSetContractAddr = (isFake: boolean) => {
+    const networkId = isFake
+      ? cfg.TEST_NETWORK_ID
+      : window.ethereum.networkVersion;
+    console.log("network:", networkId);
 
-    const network = cfg.supportedNetworks.find(
-      (obj) => obj.id === window.ethereum.networkVersion
-    );
+    const network = cfg.supportedNetworks.find((obj) => obj.id === networkId);
     if (network) {
       console.log("setting contract address ", network.contractAddress);
       dispatchState({
@@ -127,7 +145,10 @@ function App() {
     }
 
     const names = cfg.supportedNetworks.map((obj) => obj.name).join(", ");
-    alert(`Please switch to one of the supported networks: ${names}`);
+    enqueueSnackbar(
+      `Please switch to one of the supported networks: ${names}`,
+      { variant: "warning" }
+    );
     dispatchState({
       type: Action.SET_NETWORK_ERR,
       payload: `Please switch to one of the supported networks: ${names}`,
@@ -136,9 +157,10 @@ function App() {
   };
 
   const initialize = (userAddress: string) => {
+    const isFake = false; //userAddress === cfg.TEST_ADDR;
     console.log(`Initializing addr ${userAddress}`);
 
-    if (!checkNetwork()) {
+    if (!checkNetworkAndSetContractAddr(isFake)) {
       return;
     }
 
@@ -154,15 +176,24 @@ function App() {
     //WALLET, SO MAYBE MOVE THIS PART
     //ALSO SHOULD BE ABLE TO READ INFO FROM BLOCKCHAIN WITHOUT THE USER CONNECTING
     //so can move this to useEffect that runs on load
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+    //https://goerli-light.eth.linkpool.io/" //access blocked by CORS
+    //"https://rpc.ankr.com/eth_goerli" //blockrange too wide
+    //"https://eth-goerli.public.blastapi.io" //eth_getlogs is not available on our public api
+
+    const provider = isFake
+      ? new ethers.providers.JsonRpcProvider(cfg.TEST_RPC)
+      : new ethers.providers.Web3Provider(window.ethereum);
+
+    console.log("setting provider (isFake=", isFake, "): ", provider);
     dispatchState({
       type: Action.SET_PROVIDER,
       payload: provider,
     });
+    //provider.getBalance("0x815BF2acA2B96Ed514D8E547cdCfd6aE11FDDB29").then(res=>console.log(ethers.utils.formatEther(res)))
+
     //NOTE: state.provider is still not set, dispatchState doesn't set things immediately
     //console.log(state.provider) - would still be undefined
-
-    //this._getTokenData();
     _ensurePollingData();
   };
 
@@ -182,35 +213,40 @@ function App() {
     pollDataIntervalRef.current = undefined;
   };
 
-  const connectWallet = async () => {
+  const connectWallet = async (isFake: boolean) => {
     // This method is run when the user clicks the Connect. It connects the
     // dapp to the user's wallet, and initializes it.
 
-    // To connect to the user's wallet, we have to run this method.
-    // It returns a promise that will resolve to the user's address.
-    console.log("connecting wallet");
-    let accts: string[];
-    try {
-      console.log("connecting wallet");
-      accts = await window.ethereum.request({
-        method: "eth_requestAccounts",
+    //for now we won't allow non-metamask connections
+    if (isFake) {
+      enqueueSnackbar("Please install Metamask to connect", {
+        variant: "info",
       });
-    } catch (error) {
-      console.log(error);
-      enqueueSnackbar("Request to connect returned an error");
       return;
     }
-    const [selectedAddress] = accts;
-    console.log(accts);
-    // Once we have the address, we can initialize the application.
+
+    let selectedAddress: string;
+    if (isFake) {
+      selectedAddress = cfg.TEST_ADDR;
+    } else {
+      try {
+        console.log("connecting wallet");
+        [selectedAddress] = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+      } catch (error) {
+        console.log(error);
+        enqueueSnackbar("Request to connect was rejected", {variant:"info"});
+        return;
+      }
+    }
 
     initialize(selectedAddress);
 
+    if (!window.ethereum) return;
     // We reinitialize it whenever the user changes their account.
     //TODO should probably only set up this callback once, but what if user clicks
     //connect, then disconnect, then connect again?
-
-    //TODO: NOT WORKING
     window.ethereum.on("accountsChanged", ([newAddress]: string[]) => {
       console.log("on accountsChanged");
       _stopPollingData();
@@ -234,13 +270,15 @@ function App() {
     });
   };
 
-  const getContractInstance = () =>
-    new ethers.Contract(
+  const getContractInstance = () => {
+    if (!(state.provider instanceof ethers.providers.Web3Provider))
+      throw Error("Can't sign transactions, need Web3Provider");
+    return new ethers.Contract(
       state.contractAddress!,
       BetCzarArtifact.abi,
-      state.provider!.getSigner()
+      state.provider.getSigner()
     );
-
+  };
   const makeCreateBetTxPromise = (
     vals: CreateBetFormValsT
   ): Promise<ethers.providers.TransactionResponse> => {
@@ -345,11 +383,11 @@ function App() {
       // We check the error code to see if this error was produced because the
       // user rejected a tx. If that's the case, we do nothing.
       const errObj = parseRpcCallError(error);
-    
-      enqueueSnackbar(errObj.userMsg, {variant: errObj.level as VariantType})
+
+      enqueueSnackbar(errObj.userMsg, { variant: errObj.level as VariantType });
       dispatchState({ type: Action.SET_TX_ERR, payload: errObj.fullMsg });
     } finally {
-      console.log("tx attempt done")
+      console.log("tx attempt done");
 
       // If we leave the try/catch, we aren't sending a tx anymore, so we clear
       // this part of the state.
@@ -362,75 +400,60 @@ function App() {
   //We define the route structure
   let router = createBrowserRouter(
     createRoutesFromElements(
-      <Route
-        path="/"
-        element={<Header state={state} connectWallet={connectWallet} />}
-      >
-        <Route path="*" element={<Home state={state} />} />
-        {/* <Route index loader={homeLoader} element={<Home />} />  */}
-        <Route index element={<Home state={state} />} />
+      <>
+        <Route path="*" element={<Navigate to={cfg.ROUTE_PREFIX} />} />
         <Route
-          path="newbet"
-          element={
-            <CreateBetForm
-              isDisabled={!state.address}
-              onSubmit={(vals) => {
-                sendTx(makeCreateBetTxPromise(vals));
-              }}
-            />
-          }
-        />
-        <Route
-          path="deposit"
-          element={
-            <Deposit
-              state={state}
-              onSubmit={(vals) => {
-                sendTx(makeDepositTxPromise(vals));
-              }}
-            />
-          }
-        />
-        <Route
-          path="withdraw"
-          element={
-            <Withdraw
-              state={state}
-              onSubmit={(vals) => {
-                sendTx(makeWithdrawTxPromise(vals));
-              }}
-            />
-          }
-        />{" "}
-        <Route
-          path="judge"
-          element={
-            <Judge
-              state={state}
-              onSubmit={(vals) => {
-                sendTx(makeJudgeTxPromise(vals));
-              }}
-            />
-          }
-        />{" "}
-        {/* <Route path="deferred" loader={deferredLoader} element={<DeferredPage />}>
-          <Route
-            path="child"
-            loader={deferredChildLoader}
-            action={deferredChildAction}
-            element={<DeferredChild />}
-          />
-        </Route> 
-        <Route
-          path="todos"
-          action={todosAction}
-          loader={todosLoader}
-          element={<TodosList />}
-          errorElement={<TodosBoundary />}
+          path={cfg.ROUTE_PREFIX}
+          element={<Header state={state} connectWallet={connectWallet} />}
         >
-          <Route path=":id" loader={todoLoader} element={<Todo />} />
-        </Route> */}
-      </Route>
+          {/* <Route index loader={homeLoader} element={<Home />} />  */}
+          <Route index element={<Home sstate={sstate} />} />
+          <Route
+            path="newbet"
+            element={
+              <CreateBetForm
+                isDisabled={!state.address}
+                onSubmit={(vals) => {
+                  sendTx(makeCreateBetTxPromise(vals));
+                }}
+              />
+            }
+          />
+          <Route
+            path="deposit"
+            element={
+              <Deposit
+                state={state}
+                onSubmit={(vals) => {
+                  sendTx(makeDepositTxPromise(vals));
+                }}
+              />
+            }
+          />
+          <Route
+            path="withdraw"
+            element={
+              <Withdraw
+                state={state}
+                onSubmit={(vals) => {
+                  sendTx(makeWithdrawTxPromise(vals));
+                }}
+              />
+            }
+          />{" "}
+          <Route
+            path="judge"
+            element={
+              <Judge
+                state={state}
+                onSubmit={(vals) => {
+                  sendTx(makeJudgeTxPromise(vals));
+                }}
+              />
+            }
+          />
+        </Route>
+      </>
     )
   );
   //We render the Dapp

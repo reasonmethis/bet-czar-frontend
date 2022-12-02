@@ -4,7 +4,7 @@ import contractAddress from "../contracts/contract-address.json";
 export const ADDR_LEN = contractAddress.BetCzar.length;
 
 export const validateAddr = (addr: string): string | undefined => {
-  if (addr.length != ADDR_LEN) {
+  if (addr.length !== ADDR_LEN) {
     return `Address must have ${ADDR_LEN} characters`;
   }
 };

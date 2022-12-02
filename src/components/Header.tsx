@@ -27,6 +27,8 @@ import { styled } from "@mui/material/styles"; //VS code suggests from "@mui/mat
 
 import { IState } from "../StateReducer";
 import { roundAmt, shortenHash } from "../utils/utils";
+import { navigationLinks } from "../constants";
+import { NoWalletMsg } from "./NoWalletMsg";
 
 const darkTheme = createTheme({
   palette: {
@@ -52,38 +54,18 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   borderRight: "12px solid transparent",
 }));
 
-const navigationLinks = [
-  { name: "Home", href: "/" },
-  { name: "New", href: "/newbet" },
-  { name: "Deposit", href: "/deposit" },
-  { name: "Withdraw", href: "/withdraw" },
-  { name: "Judge", href: "/judge" },
-];
-
-/*const useStyles = makeStyles((theme) => ({
-  link: {
-    marginRight: 20,
-  },
-  avatar: {
-    marginRight: "auto",
-    color: "white",
-    backgroundColor: "black",
-    borderRadius: 0,
-    height: 30,
-    border: "2px solid gray",
-    borderLeft: "12px solid transparent",
-    borderRight: "12px solid transparent",
-  },
-}));*/
 type HeaderPropsT = {
   state: IState;
-  connectWallet: () => Promise<void>;
+  connectWallet: (isFake: boolean) => Promise<void>;
 };
+
 export default function NavNormalAndHamburger({
   state,
   connectWallet,
 }: HeaderPropsT) {
   const [open, setOpen] = useState(false);
+  const [noWalletMsgOpen, setNoWalletMsgOpen] = useState(false);
+  
   return (
     <>
     <ThemeProvider theme={darkTheme}>
@@ -162,11 +144,18 @@ export default function NavNormalAndHamburger({
             <Button
               variant="contained"
               onClick={() => {
-                connectWallet();
+                //connectWallet takes isFake param, if it's false connect normally 
+                //if it's true, connect without metamask with a fake address
+                if ((window as any).ethereum) connectWallet(false) 
+                else {
+                  setNoWalletMsgOpen(true)
+                  connectWallet(true)
+                }
               }}
             >
               Connect
             </Button>
+            <NoWalletMsg isOpen={noWalletMsgOpen} setOpen={setNoWalletMsgOpen}/>
           </Box>
         )}
         <Outlet />
