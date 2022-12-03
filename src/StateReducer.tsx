@@ -52,10 +52,6 @@ export type TAction =
   | TActionSetStringProperty
   | TActionSetProvider
   | TActionSetAllBets;
-// {
-//   type: Action;
-//   payload: any;
-// }
 
 export interface IState {
   balance: string | undefined;
@@ -89,7 +85,7 @@ export type StateBundleT = {
 export const stateReducer = (state: IState, action: TAction): IState => {
   switch (action.type) {
     case Action.RESET:
-      return { ...stateInit };
+      return { ...stateInit, welcomeState: state.welcomeState };
     case Action.SET_NETWORK_ERR:
       return { ...state, networkError: action.payload };
     case Action.SET_PROVIDER:

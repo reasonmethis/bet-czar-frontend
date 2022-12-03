@@ -234,6 +234,7 @@ function App() {
         [selectedAddress] = await window.ethereum.request({
           method: "eth_requestAccounts",
         });
+        console.log("addr ", selectedAddress)
       } catch (error) {
         console.log(error);
         enqueueSnackbar("Request to connect was rejected", {variant:"info"});
