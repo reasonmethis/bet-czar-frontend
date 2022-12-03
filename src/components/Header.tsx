@@ -3,6 +3,7 @@ import { Link, Outlet } from "react-router-dom";
 
 import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import logoImg from "../logo.svg"
 
 // https://github.com/pheezx/Gatsby-Portfolio/blob/master/src/components/Header.jsx
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -29,14 +30,26 @@ import { IState } from "../StateReducer";
 import { roundAmt, shortenHash } from "../utils/utils";
 import { navigationLinks } from "../constants";
 import { NoWalletMsg } from "./NoWalletMsg";
+import { useLocalStorage } from "usehooks-ts";
 
 //locked 8fc9f8, 5a7da3:  185, 95, 137 b95f89 84a98c ef798a
 //locked 90caf9, 121212: f87575 ed254e de3c4b 990033
 const darkTheme = createTheme({
+  palette: {mode:"dark"}
+})
+const lightTheme = createTheme({
+  palette: {mode:"light"}
+})
+/*
+const customLightTheme = createTheme({
   palette: {
-    mode: "dark",
+    mode: "light",
+    appbar: {
+      main: "#121212",
+      contrastText: "#fff"
+    }
   },
-});
+});*/
 
 const StyledLink = styled(Link)(({ theme }) => ({
   marginRight: 20,
@@ -67,15 +80,19 @@ export default function NavNormalAndHamburger({
 }: HeaderPropsT) {
   const [open, setOpen] = useState(false);
   const [noWalletMsgOpen, setNoWalletMsgOpen] = useState(false);
+  const [themeName, setThemeName] = useLocalStorage("betczar.theme","light")
+  const theme = (themeName==="light")? lightTheme:darkTheme
   
   return (
     <>
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
+    <ThemeProvider theme={darkTheme}>
       <AppBar position="sticky" color="default">
         <Container maxWidth="md">
           <Toolbar disableGutters>
-            <StyledAvatar>B</StyledAvatar>
+            {/* <StyledAvatar>B</StyledAvatar> */}
+            <Avatar src={logoImg} sx={{mr:"auto"}}></Avatar>
             <Hidden smDown>
               {navigationLinks.map((item) => (
                 <StyledLink
@@ -129,6 +146,7 @@ export default function NavNormalAndHamburger({
           </List>
         </SwipeableDrawer>
       </AppBar>
+      </ThemeProvider>
 
       <Container maxWidth="md" sx={{ marginTop: "16px" }}>
         {state.address ? (
