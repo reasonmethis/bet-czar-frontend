@@ -19,8 +19,9 @@ import {
   WithdrawValsT,
 } from "./components/interfaces";
 import {
-  getReadContractInstance,
   parseRpcCallError,
+  updateBalance,
+  updateBalanceAndBetInfo,
 } from "./components/operations";
 import { Action, StateBundleT, stateInit, stateReducer } from "./StateReducer";
 import { shortenHash } from "./utils/utils";
@@ -48,11 +49,16 @@ if (import.meta.hot) {
   import.meta.hot.dispose(() => router.dispose());
 }
 */
+enum FetchingState {
+  NOT_FETCHING,
+  BALANCE_FETCH,
+  FULL_FETCH,
+}
 
 function App() {
   const [state, dispatchState] = useReducer(stateReducer, stateInit);
   const pollDataIntervalRef = useRef<NodeJS.Timer | undefined>();
-  const [fetchingFlg, setFetchingFlg] = useState(false);
+  const [fetchingFlg, setFetchingFlg] = useState(FetchingState.NOT_FETCHING);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const sstate: StateBundleT = { val: state, dispatch: dispatchState };
@@ -61,22 +67,22 @@ function App() {
     //we update balance only when fetchingFlg (a) changes (b) from false to true
     //(a) is accomplished via the dependency array, (b) - manually
 
-    //console.log("fetchingflg", fetchingFlg, "addr", state.address);
     if (!state.address) {
-      setFetchingFlg(false);
+      setFetchingFlg(FetchingState.NOT_FETCHING);
       //_stopPollingData()
       return;
     }
     _ensurePollingData(); //temp, cuz it unmounts on recompile
-    if (!fetchingFlg) return;
+    if (fetchingFlg === FetchingState.NOT_FETCHING) return;
 
-    updateBalance()
-      .catch((err) => {
-        console.log("error updating balance: ", err);
-      })
-      .finally(() => {
-        setFetchingFlg(false);
-      });
+    try {
+      if (fetchingFlg === FetchingState.BALANCE_FETCH) updateBalance(sstate);
+      else updateBalanceAndBetInfo(sstate);
+    } catch (err) {
+      console.log("error fetching user info: ", err);
+    } finally {
+      setFetchingFlg(FetchingState.NOT_FETCHING);
+    }
   }, [fetchingFlg]);
 
   useEffect(
@@ -86,46 +92,6 @@ function App() {
     },
     []
   );
-
-  //Update user info
-  const updateBalance = async () => {
-    //force ts to accept provider. We don't need to check it above
-    //because if address is defined then provider is defined too -
-    //they reset together.
-    if (!state.address) return;
-    let balSt: string;
-    try {
-      const balance = await state.provider!.getBalance(state.address);
-      balSt = ethers.utils.formatEther(balance);
-    } catch (e) {
-      balSt = "NA";
-    }
-
-    console.log("balance", balSt);
-    dispatchState({
-      type: Action.SET_BALANCE,
-      payload: balSt,
-    });
-
-    //get events associated with user's address
-    console.log("getReadContractInstance");
-    const betCzar = getReadContractInstance(
-      state.provider!,
-      state.contractAddress!
-    );
-    console.log("got");
-    const filter1 = betCzar.filters.BetCreated(null, state.address, null, null);
-    const filter2 = betCzar.filters.BetCreated(null, null, state.address, null);
-    const filter3 = betCzar.filters.BetCreated(null, null, null, state.address);
-    console.log("filters done");
-    const promises = [filter1, filter2, filter3].map((f) =>
-      betCzar.queryFilter(f, 8000000)
-    );
-    const events = await Promise.all(promises);
-    console.log(events.length, " user's bets");
-    //save events in state
-    dispatchState({ type: Action.SET_ALL_BETS, payload: events });
-  };
 
   // Check if we are on a supported network
   const checkNetworkAndSetContractAddr = (isFake: boolean) => {
@@ -167,10 +133,7 @@ function App() {
     // We store the user's address
     dispatchState({ type: Action.SET_ADDRESS, payload: userAddress });
 
-    // Then, we initialize ethers, fetch the token's data, and start polling
-    // for the user's balance.
-
-    // We first initialize ethers by creating a provider using window.ethereum
+    // Initialize ethers by creating a provider using window.ethereum
 
     //TODO: THIS DOESN'T DEPEND ON USER'S ADDRESS, ONLY ON THE EXISTENCE OF THE
     //WALLET, SO MAYBE MOVE THIS PART
@@ -185,12 +148,10 @@ function App() {
       ? new ethers.providers.JsonRpcProvider(cfg.TEST_RPC)
       : new ethers.providers.Web3Provider(window.ethereum);
 
-    console.log("setting provider (isFake=", isFake, "): ", provider);
     dispatchState({
       type: Action.SET_PROVIDER,
       payload: provider,
     });
-    //provider.getBalance("0x815BF2acA2B96Ed514D8E547cdCfd6aE11FDDB29").then(res=>console.log(ethers.utils.formatEther(res)))
 
     //NOTE: state.provider is still not set, dispatchState doesn't set things immediately
     //console.log(state.provider) - would still be undefined
@@ -199,12 +160,12 @@ function App() {
 
   const _ensurePollingData = () => {
     if (pollDataIntervalRef.current) return;
-    console.log("setting interval");
+    console.log("setting polling interval");
     pollDataIntervalRef.current = setInterval(() => {
-      setFetchingFlg(true);
+      setFetchingFlg(FetchingState.BALANCE_FETCH);
     }, cfg.DT_POLLING_IN_MS);
-    // We run it once immediately so we don't have to wait for it
-    setFetchingFlg(true);
+    // Set it immediately so we don't have to wait for it
+    setFetchingFlg(FetchingState.FULL_FETCH);
   };
 
   const _stopPollingData = () => {
@@ -234,10 +195,10 @@ function App() {
         [selectedAddress] = await window.ethereum.request({
           method: "eth_requestAccounts",
         });
-        console.log("addr ", selectedAddress)
+        console.log("addr ", selectedAddress);
       } catch (error) {
         console.log(error);
-        enqueueSnackbar("Request to connect was rejected", {variant:"info"});
+        enqueueSnackbar("Request to connect was rejected", { variant: "info" });
         return;
       }
     }
@@ -352,7 +313,7 @@ function App() {
       const tx = await txPromise;
       const hashShort = shortenHash(tx.hash);
       enqueueSnackbar(`Tx ${hashShort} processing`, {
-        autoHideDuration: cfg.DUR_SNACKBAR,
+        autoHideDuration: cfg.DUR_SNACKBAR_TX,
       });
       console.log(tx.hash);
       dispatchState({ type: Action.SET_TX_BEINGSENT, payload: tx.hash });
@@ -373,8 +334,7 @@ function App() {
         throw new Error("Transaction failed, receipt has status = 0");
       }
 
-      // If we got here, the transaction was successful, so you may want to
-      // update your state.
+      // If we got here, the transaction was successful
       enqueueSnackbar(`Tx ${hashShort} complete`, {
         autoHideDuration: cfg.DUR_SNACKBAR,
         variant: "success",
@@ -393,8 +353,8 @@ function App() {
       // If we leave the try/catch, we aren't sending a tx anymore, so we clear
       // this part of the state.
       dispatchState({ type: Action.SET_TX_BEINGSENT, payload: undefined });
-      //Here, we update the user's balance.
-      await updateBalance();
+      //update all user info
+      await updateBalanceAndBetInfo(sstate);
     }
   };
 

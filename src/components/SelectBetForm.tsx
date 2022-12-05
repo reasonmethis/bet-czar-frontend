@@ -56,7 +56,7 @@ export const SelectBetForm = (props: SelectBetFormPropsT) => {
           }}
         >
           <Typography variant="subtitle1" textAlign="center" marginBottom="16px">
-            Please select the bet id
+            Please select the Bet Id
           </Typography>
           <Stack gap="0px">
             <Stack

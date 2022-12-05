@@ -59,21 +59,26 @@ export type SelectBetFormPropsT = {
   onSubmit: (vals: SelectBetFormValsT) => void;
 };
 
-export type AllBetsT = ethers.Event[][];
+//export type AllBetsT = ethers.Event[][];
+export type AllBetsT = {
+  statusesFetched: boolean,
+  betIdsForRoles: string[][],
+  betInfoMap: Map<string, BetInfoT>
+}
 
 export const betStatusDescriptions = [
-  "New bet, waiting for bettors' deposits",
-  "Waiting for Bettor 1's deposit",
-  "Waiting for Bettor 2's deposit",
-  "Bet in progress, waiting for judgement or forfeiture",
+  "Awaiting Bettors' deposits",
+  "Awaiting Bettor 1's deposit",
+  "Awaiting Bettor 2's deposit",
+  "In progress, awaiting adjudication",
   "Bettor 1 won, can claim winnings",
   "Bettor 2 won, can claim winnings",
-  "Bet complete, Bettor 1 claimed winnings",
-  "Bet complete, Bettor 2 claimed winnings",
-  "Bet cancelled by Judge, bettors can withdraw deposits",
-  "Bet cancelled by Judge, Bettor 1 withdrew deposit",
-  "Bet cancelled by Judge, Bettor 2 withdrew deposit",
-  "Bet cancelled by Judge, bettors withdrew deposits",
+  "Bettor 1 won and withdrew winnings",
+  "Bettor 2 won and withdrew winnings",
+  "Annulled by Judge, bettors can withdraw",
+  "Annulled by Judge, Bettor 2 still needs to withdraw",
+  "Annulled by Judge, Bettor 1 still needs to withdraw",
+  "Annulled by Judge, bettors withdrew deposits",
   "Unknown status",
 ];
 
@@ -112,6 +117,10 @@ export const RpcCallErrorInitVals = {
 };
 
 export type RpcCallErrorT = typeof RpcCallErrorInitVals;
+export type BetHistoryEntryT = {
+  blockNumber: number,
+  status: BetStatus
+}
 
 const tmp = {
   betId: "",
@@ -121,6 +130,7 @@ const tmp = {
   amt1: "",
   amt2: "",
   status: BetStatus.UNKNOWN,
+  history: [] as BetHistoryEntryT[],
   error: RpcCallErrorInitVals as Readonly<RpcCallErrorT>,
 };
 

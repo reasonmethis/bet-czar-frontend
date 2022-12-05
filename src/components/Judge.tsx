@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 
 import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import { ethers } from "ethers";
+import BetInformation from "./BetInformation";
+
 import {
   betInfoInitVals,
   BetStatus,
@@ -15,6 +17,7 @@ import {
 import { fetchBetInfo } from "./operations";
 import { PageHeading } from "./PageHeading";
 import { SelectBetForm } from "./SelectBetForm";
+import { StatusMsgNonHome } from "./StatusMsgNonHome";
 
 const statusTypographyvariant = "subtitle2";
 
@@ -131,26 +134,16 @@ export const Judge = (props: JudgePropsT) => {
           func();
         }}
       />
-      {isFetching && (
-        <Typography variant={statusTypographyvariant}>
-          Fetching bet info...
-        </Typography>
-      )}
+      {isFetching && <StatusMsgNonHome txt="Fetching bet info..." />}
       {isRpcErr && (
-        <Typography variant={statusTypographyvariant}>
-          Status: Query error. Please check your bet id and try again
-        </Typography>
+        <StatusMsgNonHome txt="Status: Query error. Please check your bet id and try again" />
       )}
       {isOtherErr && (
-        <Typography variant={statusTypographyvariant}>
-          Could not fetch bet info. Please check your connection and try again
-        </Typography>
+        <StatusMsgNonHome txt="Could not fetch bet info. Please check your connection and try again" />
       )}
       {isFetched && (
         <>
-          <Typography variant={statusTypographyvariant}>
-            Status: {betStatusDescriptions[betInfo.status]}
-          </Typography>
+          <StatusMsgNonHome txt={betStatusDescriptions[betInfo.status]} />
           <Stack
             direction="row"
             flexWrap="wrap"
@@ -175,7 +168,19 @@ export const Judge = (props: JudgePropsT) => {
               )}
             </>
           </Stack>
-          <Typography
+          <Card
+            elevation={3}
+            sx={{
+              padding: 2,
+              margin: "auto",
+              marginBottom: 1,
+              marginTop: 1,
+              maxWidth: "35rem",
+            }}
+          >
+            <BetInformation betInfo={betInfo} />
+          </Card>{" "}
+          {/* <Typography
             variant={statusTypographyvariant}
             sx={{ color: "text.secondary" }}
           >
@@ -205,7 +210,7 @@ export const Judge = (props: JudgePropsT) => {
             sx={{ color: "text.secondary" }}
           >
             Bettor 2's wager: {`${ethers.utils.formatEther(betInfo.amt2)} ETH`}
-          </Typography>{" "}
+          </Typography>{" "} */}
         </>
       )}
     </>

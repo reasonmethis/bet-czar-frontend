@@ -1,17 +1,104 @@
-//import {IState} from "../StateReducer"
 import { ethers } from "ethers";
-// We import the contract's artifacts and address here
+
 import BetCzarArtifact from "../contracts/BetCzar.json";
 
 import {
   betInfoInitVals,
+  BetInfoT,
+  BetStatus,
   RpcCallErrorInitVals,
   RpcCallErrorStatus,
   RpcCallErrorT,
 } from "./interfaces";
 
 import * as cfg from "../constants";
-import { StateProviderT } from "../StateReducer";
+import { Action, StateBundleT, StateProviderT } from "../StateReducer";
+
+//TODO CHECK FOR NEW EVENTS
+export const updateBalanceAndBetInfo = async (sstate: StateBundleT) => {
+  await Promise.all([updateAllBetsInfo(sstate), updateBalance(sstate)]);
+};
+
+export const updateBalance = async ({
+  val: state,
+  dispatch: dispatchState,
+}: StateBundleT) => {
+  if (!state.address || !state.provider) return;
+
+  let balSt: string;
+  try {
+    const balance = await state.provider.getBalance(state.address);
+    balSt = ethers.utils.formatEther(balance);
+  } catch (e) {
+    balSt = "NA";
+  }
+
+  dispatchState({
+    type: Action.SET_BALANCE,
+    payload: balSt,
+  });
+};
+
+export const updateAllBetsInfo = async ({
+  val: state,
+  dispatch: dispatchState,
+}: StateBundleT) => {
+  if (!state.address || !state.provider) return;
+
+  //get events associated with user's address
+  const betCzar = getReadContractInstance(
+    state.provider!,
+    state.contractAddress!
+  );
+  const filter1 = betCzar.filters.BetCreated(null, state.address, null, null);
+  const filter2 = betCzar.filters.BetCreated(null, null, state.address, null);
+  const filter3 = betCzar.filters.BetCreated(null, null, null, state.address);
+  console.log("filters done");
+  const promises = [filter1, filter2, filter3].map(
+    (f) => betCzar.queryFilter(f, 0) //TODO init blockNumber
+  );
+  const eventss = await Promise.all(promises);
+
+  //record betIds for each role and a map from each betId to a betInfo object
+  const betInfoMap = new Map<string, BetInfoT>();
+  const betIdsForRoles: string[][] = [];
+  for (const events of eventss) {
+    const betIdsForRole: string[] = [];
+    events.forEach((event) => {
+      const betId = event.args![0].toString();
+      betIdsForRole.push(betId);
+      if (!betInfoMap.has(betId))
+        betInfoMap.set(betId, convertCreateBetEventToBetInfo(event));
+    });
+    betIdsForRoles.push(betIdsForRole);
+  }
+  const betIds = Array.from(betInfoMap.keys());
+  console.log(betIds.length, " user's bets: ", betIds);
+
+  //save bets info in state
+  dispatchState({
+    type: Action.SET_ALL_BETS,
+    payload: {
+      statusesFetched: false,
+      betIdsForRoles: betIdsForRoles,
+      betInfoMap: betInfoMap,
+    },
+  });
+  //    dispatchState({ type: Action.SET_ALL_BETS, payload: eventss });
+
+  //get current statuses for all found bets, this will modify the values of betInfoMap
+  await fetchStatusesForBets(betInfoMap, betCzar);
+  console.log("statuses fetched, saving");
+  //save bets info in state
+  dispatchState({
+    type: Action.SET_ALL_BETS,
+    payload: {
+      statusesFetched: true,
+      betIdsForRoles: betIdsForRoles,
+      betInfoMap: betInfoMap,
+    },
+  });
+};
 
 export const getReadContractInstance = (
   provider: ethers.providers.BaseProvider,
@@ -41,6 +128,31 @@ export const parseRpcCallError = (error: any): RpcCallErrorT => {
   return res;
 };
 
+export const convertCreateBetEventToBetInfo = (
+  event: ethers.Event
+): BetInfoT => {
+  const betInfo = { ...betInfoInitVals };
+  if (!event.args) return betInfo; //shouldn't happen
+  //we extract the info and populate betInfo
+  betInfo.betId = event.args[0].toString();
+  betInfo.bettor1 = event.args[1];
+  betInfo.bettor2 = event.args[2];
+  betInfo.judge = event.args[3];
+  betInfo.amt1 = event.args[4].toString();
+  betInfo.amt2 = event.args[5].toString();
+  betInfo.history = [
+    //need to assign, not push, because otherwise
+    //different betInfos history arrays are actually the same reference
+    {
+      blockNumber: event.blockNumber,
+      status: BetStatus.CREATED,
+    },
+  ];
+  //betInfo.status = res.status;
+  betInfo.error = { ...betInfo.error, status: RpcCallErrorStatus.NO_ERROR };
+  return betInfo;
+};
+
 export const fetchBetInfo = async (
   betId: number,
   provider: StateProviderT,
@@ -67,4 +179,40 @@ export const fetchBetInfo = async (
     console.log(betInfo.error);
   }
   return betInfo;
+};
+
+export const fetchStatusesForBets = async (
+  betInfoMap: Map<string, BetInfoT>,
+  contract: ethers.Contract
+) => {
+  //const betInfo = { ...betInfoInitVals }; //see above
+  const betIds = Array.from(betInfoMap.keys());
+  try {
+    //const contract = getReadContractInstance(provider!, contractAddress!);
+
+    //get all status change events for all user's bets
+    const filter = contract.filters.BetStatusChange(betIds);
+
+    const events = await contract.queryFilter(filter, 0); //TODO incl init block
+
+    //clear previous history of each bet. Will leave the first item, because it's
+    //from the Create event, not from a status change event
+    for (const betInfo of betInfoMap.values()) betInfo.history.length = 1;
+    //populate the history of all user's Bets
+    for (const event of events) {
+      betInfoMap.get(event.args?.betId.toString())?.history.push({
+        blockNumber: event.blockNumber,
+        status: event.args!.newStatus,
+      });
+    }
+
+    //determine and record the current state of all bets
+    for (const [_, betInfo] of betInfoMap) {
+      betInfo.status = betInfo.history[betInfo.history.length - 1].status;
+      console.log("History for betId", betInfo.betId, betInfo.history);
+    }
+  } catch (error) {
+    const parsedError = parseRpcCallError(error);
+    console.log(parsedError);
+  }
 };

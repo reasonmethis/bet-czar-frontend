@@ -9,9 +9,13 @@ import handwrittenImg from "../Bet Czar handwritten transparent bg.png";
 // https://github.com/pheezx/Gatsby-Portfolio/blob/master/src/components/Header.jsx
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MenuIcon from "@mui/icons-material/Menu";
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import PaidIcon from '@mui/icons-material/Paid';
+
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
@@ -36,10 +40,10 @@ import { NoWalletMsg } from "./NoWalletMsg";
 //locked 8fc9f8, 5a7da3:  185, 95, 137 b95f89 84a98c ef798a
 //locked 90caf9, 121212: f87575 ed254e de3c4b 990033
 const darkTheme = createTheme({
-  palette: { mode: "dark", secondary: { main: "#ff499e" } },
+  palette: { mode: "dark", secondary: { main: "#ff499e" }, error: {main: "#880044"} },
 });
 const lightTheme = createTheme({
-  palette: { mode: "light", secondary: { main: "#ff499e" } },
+  palette: { mode: "light", secondary: { main: "#ff499e" }, error: {main: "#880044"} },
 });
 /*
 const customLightTheme = createTheme({
@@ -168,24 +172,32 @@ export default function NavNormalAndHamburger({
 
         <Container maxWidth="md" sx={{ marginTop: "16px" }}>
           {state.address ? (
-            <Box marginBottom="16px">
+            <Box marginBottom="16px" >
+              <Stack direction="row" alignItems="center" gap={1} flexWrap="wrap">
+              <AccountBalanceWalletIcon/>
               <Typography variant="subtitle1">
-                Address: {shortenHash(state.address)}
+                {shortenHash(state.address)}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Balance:{" "}
+              <PaidIcon/>
+              {/* <Typography variant="body2" color="text.secondary"> */}
+              <Typography variant="subtitle1" color="text.primary">
                 {state.balance === undefined
                   ? "Fetching..."
                   : roundAmt(state.balance, 4) + " ETH"}
-              </Typography>
+              </Typography></Stack>
             </Box>
           ) : (
             <Box marginBottom="16px">
-              <Typography variant="subtitle1" sx={{ paddingBottom: "8px" }}>
-                Please connect your wallet to create and manage Bets
+              <Stack direction="row" alignItems="center" gap={1} flexWrap="wrap">
+              <AccountBalanceWalletIcon/>
+              {/* <Typography variant="subtitle1" sx={{ paddingBottom: "8px" }}>
+                Please connect your wallet to create and manage Bets */}
+                <Typography variant="subtitle1" >
+                  Wallet not connected
               </Typography>
               <Button
-                variant="contained"
+                variant="text"
+                size="small"
                 onClick={() => {
                   //connectWallet takes isFake param, if it's false connect normally
                   //if it's true, connect without metamask with a fake address
@@ -202,6 +214,7 @@ export default function NavNormalAndHamburger({
                 isOpen={noWalletMsgOpen}
                 setOpen={setNoWalletMsgOpen}
               />
+              </Stack>
             </Box>
           )}
           <Outlet />

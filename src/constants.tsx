@@ -29,6 +29,7 @@ export const supportedNetworks = [
 
 export const DT_POLLING_IN_MS = 20000;
 export const DUR_SNACKBAR = 15000;
+export const DUR_SNACKBAR_TX = 120000;
 
 export const txCodes = [
   { code: "ACTION_REJECTED", userMsg: "Tx rejected by user", level: "info" },
@@ -39,6 +40,8 @@ export const txCodes = [
   },
   { code: "NETWORK_ERROR", userMsg: "Network is not responding to requests", level: "error" },
 ];
+
+export const statusTypographyvariant = "subtitle2";
 
 export const welcomeMsgs = {
   normal: [
