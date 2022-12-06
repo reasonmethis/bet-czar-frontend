@@ -1,4 +1,3 @@
-import { ethers } from "ethers";
 import { IState } from "../StateReducer";
 
 export const CreateBetFormInitVals = {

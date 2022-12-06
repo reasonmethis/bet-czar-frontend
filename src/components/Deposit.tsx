@@ -27,10 +27,15 @@ export const Deposit = (props: DepositPropsT) => {
   const [betId, setBetId] = useState(-1);
 
   useEffect(() => {
-    console.log("tx: ", props.state.txBeingSent);
+    console.log("txBeingSent updated to: ", props.state.txBeingSent);
     if (props.state.txBeingSent || betId < 0) return;
     //if txbeingsent changed from something to nothing then maybe
     //the bet status changed, so refetch
+
+    //TODO currently we have two places that fetch updated info when a tx is finished
+    //here and in sendtx function (which awaits tx confirmation and updates user 
+    //balance and betinfo). So we should not need this fetch, we can make it
+    //so betInfo here updates when the global betinfo map updates
     const func = async () => {
       const newBetInfo = await fetchBetInfo(
         betId,

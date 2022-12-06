@@ -1,16 +1,14 @@
-import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
-import { styled } from "@mui/material/styles"
+import { styled } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
 
-const linkSeparatorToken = " ##"
+const linkSeparatorToken = " ##";
 
 const CustomLink = styled(Link)(({ theme }) => ({
-    underline: "hover",
-    //textDecoration: "none",
-    //color: `${theme.palette.text.primary}`, //`${theme.palette.primary.main}`
-    target: "_blank",
-    rel: "noopener",    
-  }));
+  underline: "hover",
+  //target: "_blank",
+  //rel: "noopener", //this and target don't work here, must specify when invoked
+}));
 
 type CustomTypographyPropsT = {
   text: string;
@@ -26,26 +24,27 @@ function CustomTypography({ text }: CustomTypographyPropsT) {
           {txt}
         </Typography>
       );
-      case "P":
-        return (
-          <Typography component="span" color="primary">
-            {txt}
-          </Typography>
-        );
-        case "S":
-            return (
-              <Typography component="span" color="secondary">
-                {txt}
-              </Typography>
-            );
-            case "L":
-                const [trueTxt, link] = txt.split(linkSeparatorToken)
-                return (
-                  <CustomLink href={link}>
-                    {trueTxt}
-                  </CustomLink>
-                );
-            default:
+    case "P":
+      return (
+        <Typography component="span" color="primary">
+          {txt}
+        </Typography>
+      );
+    case "S":
+      return (
+        <Typography component="span" color="secondary">
+          {txt}
+        </Typography>
+      );
+    case "L":
+      const [trueTxt, link] = txt.split(linkSeparatorToken);
+      return (
+        // https://mui.com/material-ui/react-link/
+        <CustomLink href={link} target="_blank" rel="noopener">
+          {trueTxt}
+        </CustomLink>
+      );
+    default:
       return <Typography component="span">{txt}</Typography>;
   }
 }

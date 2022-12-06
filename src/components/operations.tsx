@@ -30,7 +30,10 @@ export const updateBalance = async ({
     const balance = await state.provider.getBalance(state.address);
     balSt = ethers.utils.formatEther(balance);
   } catch (e) {
-    balSt = "NA";
+    //balSt = "NA"; //causes shown balance to temporarily change to NA if
+    //there's a temporary Metamask/connection error 
+    console.log("Error fetching balance: ", e)
+    return //TODO some logic if can't fetch for a while 
   }
 
   dispatchState({

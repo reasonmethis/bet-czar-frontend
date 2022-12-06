@@ -59,14 +59,15 @@ export const welcomeMsgs = {
     ],
     [
       "S:Can Bet Czar steal our money? ",
-      'N: No, the contract is built with no "superuser", only the bet participants can withdraw the money in the escrow. The contract code can be examined, it is verified on Etherscan. ',
+      'N: No, the contract is built with no "superuser", only the bet participants can withdraw the money in the escrow. The contract code can be examined, it is ',
+
+      "L: verified ##https://goerli.etherscan.io/address/0x497ff2D9CC6674b64e1619c87468EFE8692F0353#code","N: on Etherscan. ",
     ],
   ],
 };
 
 export const connectBtnMsgs = {
   nowallet: [
-    //["N: You need the Metamask wallet to create and manage Bets."],
     [
       "S: What is that?",
       "N: Metamask is by far the most widely used crypto wallet to interact with decentralized Apps like this one. It serves as the middleman between you and the App, so that you can authorize transactions without telling the App your private information.",

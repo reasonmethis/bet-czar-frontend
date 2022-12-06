@@ -4,7 +4,6 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import logoImg from "../logo.svg";
-import handwrittenImg from "../Bet Czar handwritten transparent bg.png";
 
 // https://github.com/pheezx/Gatsby-Portfolio/blob/master/src/components/Header.jsx
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -56,7 +55,7 @@ const customLightTheme = createTheme({
   },
 });*/
 
-const StyledLink = styled(Link)(({ theme }) => ({
+const NavLink = styled(Link)(({ theme }) => ({
   marginRight: 20,
   //underline: "none",
   textDecoration: "none",
@@ -103,7 +102,7 @@ export default function NavNormalAndHamburger({
                 <Hidden smDown>
                   {navigationLinks.map((item) =>
                     item.href === location.pathname ? (
-                      <StyledLink
+                      <NavLink
                         to={item.href}
                         key={item.name}
                         sx={{
@@ -113,11 +112,11 @@ export default function NavNormalAndHamburger({
                         }}
                       >
                         {item.name}
-                      </StyledLink>
+                      </NavLink>
                     ) : (
-                      <StyledLink to={item.href} key={item.name}>
+                      <NavLink to={item.href} key={item.name}>
                         {item.name}
-                      </StyledLink>
+                      </NavLink>
                     )
                   )}
                 </Hidden>
@@ -149,7 +148,7 @@ export default function NavNormalAndHamburger({
                 {navigationLinks.map((item) => (
                   <ListItem key={item.name}>
                     {item.href === location.pathname ? (
-                      <StyledLink
+                      <NavLink
                         to={item.href}
                         sx={{
                           borderBottom:
@@ -157,11 +156,11 @@ export default function NavNormalAndHamburger({
                         }}
                       >
                         {item.name}
-                      </StyledLink>
+                      </NavLink>
                     ) : (
-                      <StyledLink to={item.href} key={item.name}>
+                      <NavLink to={item.href} key={item.name}>
                         {item.name}
-                      </StyledLink>
+                      </NavLink>
                     )}
                   </ListItem>
                 ))}
