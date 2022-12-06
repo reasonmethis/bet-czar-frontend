@@ -1,6 +1,6 @@
 # Bet Czar
 
-What is it? Bet Czar is a decentralized application (dapp) uses the blockchain to create and enforce any bets between two parties. You can view a [working demo].
+Bet Czar is a decentralized application (dapp), it uses the blockchain to create and enforce any bets between two parties. You can view a [working demo].
 
 ## Gentle Introduction 
 
@@ -54,7 +54,7 @@ Currently the [working demo] is deployed on the Ethereum testnet Goerli, so you 
 
 2. Connect Metamask to the Goerli testnet (in case you are new to Metamask refer to the video linked above or follow [this guide](https://blog.cryptostars.is/goerli-g%C3%B6rli-testnet-network-to-metamask-and-receiving-test-ethereum-in-less-than-2-min-de13e6fe5677)). You can now click the Connect button in [Bet Czar][working demo].
 
-3. Your balance probably 0. Then it's time to get yourself some free test ETH tokens. You can quickly collect 0.01ETH or so from the [Goerli POW faucet](https://goerli-faucet.pk910.de/) (there are other commonly used faucets but they require you to make a Twitter post or sign up for an Alchemy account).
+3. Your balance is probably 0. Then it's time to get yourself some free test ETH tokens. You can quickly collect 0.01ETH or so from the [Goerli POW faucet](https://goerli-faucet.pk910.de/) (there are other commonly used faucets but they require you to make a Twitter post or sign up for an Alchemy account).
 
 You are now able to fully explore the full functionality of Bet Czar!
 
