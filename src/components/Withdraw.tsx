@@ -171,12 +171,6 @@ export const Withdraw = (props: WithdrawPropsT) => {
       {isFetched && (
         <>
           <StatusMsgNonHome txt={betStatusDescriptions[betInfo.status]} />
-          <Stack direction="row" flexWrap="wrap" justifyContent="center">
-            <BarChartIcon sx={{ mr: 1 }} />
-            <Typography variant="body2" sx={{ pt: "0.2rem" }}>
-              {betStatusDescriptions[betInfo.status]}
-            </Typography>
-          </Stack>
           <Stack
             direction="row"
             flexWrap="wrap"
