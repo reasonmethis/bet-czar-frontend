@@ -1,6 +1,6 @@
 # Bet Czar
 
-What is it? Bet Czar is a decentralized application (dapp), it uses the blockchain to create and enforce any bets between two parties. You can view a [working demo].
+What is it? Bet Czar is a decentralized application (dapp) uses the blockchain to create and enforce any bets between two parties. You can view a [working demo].
 
 ## Gentle Introduction 
 
@@ -52,11 +52,10 @@ Currently the [working demo] is deployed on the Ethereum testnet Goerli, so you 
 
 1. If you don't have the Metamask wallet, [install it](https://metamask.io). Typically people install it as a Chrome extension, but it's available for all major browsers. Metamask will then walk you through creating your wallet address. I found a short [Youtube video](https://www.youtube.com/watch?v=ucOY4qkxfRE) that shows this step, as well as the next two steps.
 
-2. Connect Metamask to the Goerli testnet (in case you are new to Metamask refer to the video linked above or follow [this guide](https://blog.cryptostars.is/goerli-g%C3%B6rli-testnet-network-to-metamask-and-receiving-test-ethereum-in-less-than-2-min-de13e6fe5677)). You can now click the Connect button in [Bet Czar][1].
+2. Connect Metamask to the Goerli testnet (in case you are new to Metamask refer to the video linked above or follow [this guide](https://blog.cryptostars.is/goerli-g%C3%B6rli-testnet-network-to-metamask-and-receiving-test-ethereum-in-less-than-2-min-de13e6fe5677)). You can now click the Connect button in [Bet Czar][working demo].
 
 3. Your balance probably 0. Then it's time to get yourself some free test ETH tokens. You can quickly collect 0.01ETH or so from the [Goerli POW faucet](https://goerli-faucet.pk910.de/) (there are other commonly used faucets but they require you to make a Twitter post or sign up for an Alchemy account).
 
 You are now able to fully explore the full functionality of Bet Czar!
 
 [working demo]: https://reasonmethis.github.io/betczar_frontend
-[1]: https://reasonmethis.github.io/betczar_frontend
