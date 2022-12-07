@@ -4,11 +4,12 @@ Bet Czar is a decentralized application (dapp), which uses the blockchain to cre
 
 ### Table of Contents
 
-**[Non-technical Introduction](#gentle-introduction)**<br>
+**[Non-technical Introduction](#non-technical-introduction)**<br>
+**[Quick Start](#quick-start)**<br>
 **[How Bets Work Exactly](#how-bets-work-exactly)**<br>
 **[Using the Front-end](#using-the-front-end)**<br>
 
-## Gentle Introduction 
+## Non-technical Introduction 
 
 **What kind of bets are we talking about?** Essentially any kind. Here's a toy example: say you bet your friend Bob $100 that you can teach your cat to do a somersault in two weeks. Unfortunately Bob is flaky, so you need some way to make sure he will pay up. You can then use Bet Czar to create a bet enforced by a smart contract.
 
@@ -16,7 +17,15 @@ Bet Czar is a decentralized application (dapp), which uses the blockchain to cre
 
 **Can Bet Czar steal our money?** No, the contract is built with no "superuser", only the bet participants can withdraw the money in the escrow. Unlike some well-known recent cases (ahem... FTX), the contract doesn't allow for users' deposits to be lent out or used for anything else. The funds just sit there, waiting for the winner to be registered, at which point they automatically become available for withdrawal by the winner. 
 
-This next bit is a tad too technical for the gentle introduction but important for completeness: the contract code can be examined, it is [verified](https://goerli.etherscan.io/address/0x497ff2D9CC6674b64e1619c87468EFE8692F0353#code) on Etherscan. As with any dapp, when you use it, your wallet will show you which contract you are interacting with, so you can double check it's the right one.
+This next bit is a tad too technical for the supposedly *non-technical* introduction but important for completeness (feel free to ignore it if it doesn't make sense): the contract code can be examined, it is [verified](https://goerli.etherscan.io/address/0x497ff2D9CC6674b64e1619c87468EFE8692F0353#code) on Etherscan. As with any dapp, when you use it, your wallet will show you which contract you are interacting with, so that you don't need to just blindly trust that the front-end is indeed hooked up to the right contract.
+
+## Quick Start
+
+This is a super-condensed TL;DR version of this guide. If something doesn't make sense, please read the more detailed sections below. Steps to test out Bet Czar:
+
+1. Connect your Metamask wallet to the Goerli testnet, then get yourself at least 0.01 ETH in [free test tokens][faucet].
+2. Go to [Bet Czar][working demo], connect, and click New to create a sample Bet (use your address for all three participants).
+3. Click Home to see your new Bet, use the Bet Id shown to interact with it (deposit, withdraw, etc.).
 
 ## How Bets Work Exactly 
 
@@ -64,7 +73,7 @@ Follow these steps and you will be ready to go in no time. I found a short [Yout
 
 2. Connect Metamask to the Goerli testnet (in case you are new to Metamask refer to the video linked above or follow [this guide](https://blog.cryptostars.is/goerli-g%C3%B6rli-testnet-network-to-metamask-and-receiving-test-ethereum-in-less-than-2-min-de13e6fe5677)). You can now click the Connect button in [Bet Czar][working demo].
 
-3. Your balance is probably 0. Then it's time to get yourself some free test ETH tokens. You can quickly collect 0.01ETH or so from the [Goerli POW faucet](https://goerli-faucet.pk910.de/) (there are other commonly used faucets but they require you to make a Twitter post or sign up for an Alchemy account).
+3. Your balance is probably 0. Then it's time to get yourself some free test ETH tokens. You can quickly collect 0.01ETH or so from the [Goerli POW faucet][faucet] (there are other commonly used faucets but they require you to make a Twitter post or sign up for an Alchemy account).
 
 You are now able to fully explore the full functionality of Bet Czar!
 
@@ -87,3 +96,4 @@ You can now create a test Bet:
 Your first Bet is now on the blockchain! You can now explore the other sections of Bet Czar. Start by going to the Home section to see your new Bet on your Dashboard. In particular you will see your **Bet Id**. You can now go to the other sections and use the Bet Id to perform actions such as depositing wagers, adjudicating the outcome (you made yourself the Judge, remember?), and withdrawing. Happy betting!
 
 [working demo]: https://reasonmethis.github.io/betczar_frontend
+[faucet]: https://goerli-faucet.pk910.de
