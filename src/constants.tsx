@@ -6,7 +6,8 @@ export const navigationLinks = [
   { name: "New", href: ROUTE_PREFIX + "/newbet" },
   { name: "Deposit", href: ROUTE_PREFIX + "/deposit" },
   { name: "Withdraw", href: ROUTE_PREFIX + "/withdraw" },
-  { name: "Judge", href: ROUTE_PREFIX + "/judge" },
+  { name: "Judge", href: ROUTE_PREFIX + "/judge" }, 
+  { name: "Docs", href: "https://github.com/reasonmethis/betczar_frontend/blob/master/README.md" },
 ];
 // Here's a list of network ids https://docs.metamask.io/guide/ethereum-provider.html#properties
 // to use when deploying to other networks.
