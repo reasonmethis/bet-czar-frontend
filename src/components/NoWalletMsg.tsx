@@ -16,6 +16,8 @@ export type NoWalletMsgPropsT = {
 
 export function NoWalletMsg({ isOpen, setOpen }: NoWalletMsgPropsT) {
   const handleClose = () => setOpen(false)
+  const paragraphArray = connectBtnMsgs["nowallet"]
+  const lastParagraphInd = paragraphArray.length - 1
   return (
     <>
       <Dialog
@@ -27,8 +29,8 @@ export function NoWalletMsg({ isOpen, setOpen }: NoWalletMsgPropsT) {
         <DialogTitle>No Metamask on this browser</DialogTitle>
         <DialogContent>
           <DialogContentText component="div">
-            {connectBtnMsgs["nowallet"].map((paragraph, i) => (
-              <CustomTypographyList key={i} parts={paragraph} />
+            {paragraphArray.map((paragraph, i) => (
+              <CustomTypographyList key={i} parts={paragraph} isParagraph={i < lastParagraphInd}/>
             ))}
           </DialogContentText>
         </DialogContent>
