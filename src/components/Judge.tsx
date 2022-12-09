@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 
 import BetInformation from "./BetInformation";
 
+import { Action } from "../StateReducer";
 import {
   betInfoInitVals,
   BetStatus,
@@ -28,26 +29,33 @@ type JudgeBtnProps = {
 
 export const Judge = (props: JudgePropsT) => {
   const [betInfo, setBetInfo] = useState({ ...betInfoInitVals });
-  const [betId, setBetId] = useState(-1);
+  //const [betId, setBetId] = useState(props.state.betIdOI ? +props.state.betIdOI : -1);
+
+  const fetchAndSetBetInfo = async (betId: string) => {
+    const newBetInfo = await fetchBetInfo(
+      betId,
+      props.state.provider,
+      props.state.contractAddress
+    );
+    setBetInfo({ ...newBetInfo });
+  };
 
   useEffect(() => {
-    if (props.state.txBeingSent || betId < 0) return;
+    //console.log("txBeingSent: ", props.state.txBeingSent);
+    if (props.state.txBeingSent || !props.state.betIdOI) return;
     //if txbeingsent changed from something to nothing then maybe
     //the bet status changed, so refetch
-    const func = async () => {
-      const newBetInfo = await fetchBetInfo(
-        betId,
-        props.state.provider,
-        props.state.contractAddress
-      );
-      setBetInfo({ ...newBetInfo });
-    };
-    func();
+
+    //TODO currently we have two places that fetch updated info when a tx is finished
+    //here and in sendtx function (which awaits tx confirmation and updates user
+    //balance and betinfo). So we should not need this fetch, we can make it
+    //so betInfo here updates when the global betinfo map updates
+    fetchAndSetBetInfo(props.state.betIdOI);
   }, [props.state.txBeingSent]);
 
   useEffect(() => {
     setBetInfo({ ...betInfoInitVals });
-  }, [betId]);
+  }, [props.state.betIdOI]);
 
   //console.log("def dep btn, betid = ", betId, "status =", betInfo.status);
   const JudgeBtn = ({ winner, isJudge }: JudgeBtnProps) => {
@@ -80,7 +88,7 @@ export const Judge = (props: JudgePropsT) => {
   const isBettor2 =
     props.state.address?.toLowerCase() === betInfo.bettor2.toLowerCase();
 
-  if (betId >= 0)
+  if (props.state.betIdOI)
     if (betInfo.error.status === RpcCallErrorStatus.UNDEFINED)
       isFetching = true;
     else if (betInfo.error.status === RpcCallErrorStatus.RECOGNIZED_RPC_ERROR)
@@ -118,20 +126,14 @@ export const Judge = (props: JudgePropsT) => {
       <PageHeading text="Adjudications and Forfeitures"></PageHeading>
       <SelectBetForm
         isDisabled={!props.state.address}
+        initVal={props.state.betIdOI}
         onSubmit={(vals) => {
-          setBetId(+vals.betId);
-          const func = async () => {
-            const newBetInfo = await fetchBetInfo(
-              +vals.betId,
-              props.state.provider,
-              props.state.contractAddress
-            );
-            // PITFALL - have to use the spread operator because otherwise it doesn't rerender
-            // it looks like the above call always returns the same reference - that would explain
-            // why React doesn't detect a state change if I don't use the spread operator
-            setBetInfo({ ...newBetInfo });
-          };
-          func();
+          //setBetId(+vals.betId);
+          props.dispatchState({
+            type: Action.SET_BET_ID_OI,
+            payload: vals.betId,
+          });
+          fetchAndSetBetInfo(vals.betId);
         }}
       />
       {isFetching && <StatusMsgNonHome txt="Fetching bet info..." />}
@@ -161,9 +163,14 @@ export const Judge = (props: JudgePropsT) => {
                   <JudgeBtn isJudge={true} winner={0} />
                 </>
               )}
-              {(!isPending || (!isJudge && !isBettor1 && !isBettor2)) && (
+              {(isPending && !isJudge && !isBettor1 && !isBettor2) && (
                 <Typography variant="button" sx={{ color: "error.main" }}>
-                  YOU CANNOT ADJUDICATE THIS BET
+                  YOU ARE NOT A PARTICIPANT OF THIS BET
+                </Typography>
+              )}
+              {!isPending && (
+                <Typography variant="button" sx={{ color: "error.main" }}>
+                  NOTHING TO ADJUDICATE
                 </Typography>
               )}
             </>

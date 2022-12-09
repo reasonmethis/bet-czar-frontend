@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import {
   createBrowserRouter,
@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 
 import { useSnackbar, VariantType } from "notistack";
+import { useInterval } from "usehooks-ts";
 
 import "./App.css";
 import {
@@ -50,45 +51,62 @@ if (import.meta.hot) {
 }
 */
 enum FetchingState {
-  NOT_FETCHING,
-  BALANCE_FETCH,
-  FULL_FETCH,
+  FETCHING_OFF,
+  FETCH_ONGOING,
+  SHOULD_BALANCE_FETCH,
+  SHOULD_FULL_FETCH,
 }
 
 function App() {
   const [state, dispatchState] = useReducer(stateReducer, stateInit);
-  const pollDataIntervalRef = useRef<NodeJS.Timer | undefined>();
-  const [fetchingFlg, setFetchingFlg] = useState(FetchingState.NOT_FETCHING);
+  //const pollDataIntervalRef = useRef<NodeJS.Timer | undefined>();
+  const fetchingFlgRef = useRef(FetchingState.FETCHING_OFF);
+  //const [fetchingFlg, setFetchingFlg] = useState(FetchingState.NOT_FETCHING);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  useInterval( //https://overreacted.io/making-setinterval-declarative-with-react-hooks/
+    periodicInfoFetch,
+    fetchingFlgRef.current === FetchingState.FETCHING_OFF
+      ? null
+      : cfg.DT_POLLING_IN_MS
+  );
 
   const sstate: StateBundleT = { val: state, dispatch: dispatchState };
 
-  useEffect(() => {
+  async function periodicInfoFetch() {
     //we update balance only when fetchingFlg (a) changes (b) from false to true
     //(a) is accomplished via the dependency array, (b) - manually
-
-    if (!state.address) {
-      setFetchingFlg(FetchingState.NOT_FETCHING);
-      //_stopPollingData()
+    console.log("periodicinfofetch, ff=", fetchingFlgRef.current);
+    if (!state.address || !state.provider) {
+      //fetchingFlgRef.current = FetchingState.FETCH_ONGOING;
+      stopPollingData(); //TODO maybe don't need
       return;
     }
-    _ensurePollingData(); //temp, cuz it unmounts on recompile
-    if (fetchingFlg === FetchingState.NOT_FETCHING) return;
+    ensurePollingData(); //temp, cuz it unmounts on recompile
+    if (fetchingFlgRef.current === FetchingState.FETCH_ONGOING) return;
 
+    //const asyncFetch = async () => {
+    const updatePromise =
+      fetchingFlgRef.current === FetchingState.SHOULD_BALANCE_FETCH
+        ? updateBalance(sstate)
+        : updateBalanceAndBetInfo(sstate);
+    fetchingFlgRef.current = FetchingState.FETCH_ONGOING;
     try {
-      if (fetchingFlg === FetchingState.BALANCE_FETCH) updateBalance(sstate);
-      else updateBalanceAndBetInfo(sstate);
+      await updatePromise;
     } catch (err) {
       console.log("error fetching user info: ", err);
     } finally {
-      setFetchingFlg(FetchingState.NOT_FETCHING);
+      fetchingFlgRef.current = FetchingState.SHOULD_BALANCE_FETCH;
     }
-  }, [fetchingFlg]);
+  }
+
+  useEffect(() => {
+    periodicInfoFetch();
+  }, [state.address]);
 
   useEffect(
     () => () => {
       console.log("unmount");
-      _stopPollingData();
+      stopPollingData();
     },
     []
   );
@@ -155,24 +173,20 @@ function App() {
 
     //NOTE: state.provider is still not set, dispatchState doesn't set things immediately
     //console.log(state.provider) - would still be undefined
-    _ensurePollingData();
+    ensurePollingData();
   };
 
-  const _ensurePollingData = () => {
-    if (pollDataIntervalRef.current) return;
+  const ensurePollingData = () => {
+    if (fetchingFlgRef.current === FetchingState.FETCHING_OFF) {
     console.log("setting polling interval");
-    pollDataIntervalRef.current = setInterval(() => {
-      setFetchingFlg(FetchingState.BALANCE_FETCH);
-    }, cfg.DT_POLLING_IN_MS);
-    // Set it immediately so we don't have to wait for it
-    setFetchingFlg(FetchingState.FULL_FETCH);
+    fetchingFlgRef.current = FetchingState.SHOULD_FULL_FETCH;
   };
+}
 
-  const _stopPollingData = () => {
+  const stopPollingData = () => {
     console.log("clearing interval");
-    clearInterval(pollDataIntervalRef.current);
-    pollDataIntervalRef.current = undefined;
-  };
+    fetchingFlgRef.current = FetchingState.FETCHING_OFF 
+  }; //TODO make sure App rerenders so that useInterval can pick up the change
 
   const connectWallet = async (isFake: boolean) => {
     // This method is run when the user clicks the Connect. It connects the
@@ -211,7 +225,7 @@ function App() {
     //connect, then disconnect, then connect again?
     window.ethereum.on("accountsChanged", ([newAddress]: string[]) => {
       console.log("on accountsChanged");
-      _stopPollingData();
+      stopPollingData();
       // `accountsChanged` event can be triggered with an undefined newAddress.
       // This happens when the user removes the Dapp from the "Connected
       // list of sites allowed access to your addresses" (Metamask > Settings > Connections)
@@ -227,7 +241,7 @@ function App() {
     //TODO see above
     window.ethereum.on("chainChanged", ([]) => {
       console.log("chain chng");
-      _stopPollingData();
+      stopPollingData();
       dispatchState({ type: Action.RESET });
     });
   };
@@ -385,6 +399,7 @@ function App() {
             element={
               <Deposit
                 state={state}
+                dispatchState={dispatchState}
                 onSubmit={(vals) => {
                   sendTx(makeDepositTxPromise(vals));
                 }}
@@ -396,6 +411,7 @@ function App() {
             element={
               <Withdraw
                 state={state}
+                dispatchState={dispatchState}
                 onSubmit={(vals) => {
                   sendTx(makeWithdrawTxPromise(vals));
                 }}
@@ -407,6 +423,7 @@ function App() {
             element={
               <Judge
                 state={state}
+                dispatchState={dispatchState}
                 onSubmit={(vals) => {
                   sendTx(makeJudgeTxPromise(vals));
                 }}

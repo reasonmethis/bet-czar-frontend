@@ -31,9 +31,9 @@ export const updateBalance = async ({
     balSt = ethers.utils.formatEther(balance);
   } catch (e) {
     //balSt = "NA"; //causes shown balance to temporarily change to NA if
-    //there's a temporary Metamask/connection error 
-    console.log("Error fetching balance: ", e)
-    return //TODO some logic if can't fetch for a while 
+    //there's a temporary Metamask/connection error
+    console.log("Error fetching balance: ", e);
+    return; //TODO some logic if can't fetch for a while
   }
 
   dispatchState({
@@ -67,16 +67,33 @@ export const updateAllBetsInfo = async ({
   const betIdsForRoles: string[][] = [];
   for (const events of eventss) {
     const betIdsForRole: string[] = [];
-    events.forEach((event) => {
-      const betId = event.args![0].toString();
+    //seems using a regular for loop may be more efficient than using forEach:
+    //https://stackoverflow.com/questions/32682962/javascript-loop-through-array-backwards-with-foreach
+    //Also, forEach can't go in reverse. Though can use reduceRight instead
+
+    //Events come in chronological order, so by looping in reverse we 
+    //are putting latest created bets first: both in the three betIdsForRole arrays
+    //and in the betInfoMap order of keys (betIds)
+    for (let i = events.length - 1; i >= 0; i--) {
+      const betId = events[i].args![0].toString();
       betIdsForRole.push(betId);
       if (!betInfoMap.has(betId))
-        betInfoMap.set(betId, convertCreateBetEventToBetInfo(event));
-    });
+        betInfoMap.set(betId, convertCreateBetEventToBetInfo(events[i]));
+    }
     betIdsForRoles.push(betIdsForRole);
   }
   const betIds = Array.from(betInfoMap.keys());
   console.log(betIds.length, " user's bets: ", betIds);
+
+  if (state.allBets) {
+     if (state.allBets.betInfoMap.size < betInfoMap.size) {
+      const newBetId =  betInfoMap.size - 1
+      console.log("new bet, bet id ", newBetId);
+      //make it the current betid oi - NAH, NOT A GOOD IDEA
+      //what if I am on a Deposit page and a new bet is created, 
+      //dispatchState({type: Action.SET_BET_ID_OI, payload: newBetId.toString()})
+     }
+  }
 
   //save bets info in state
   dispatchState({
@@ -157,7 +174,7 @@ export const convertCreateBetEventToBetInfo = (
 };
 
 export const fetchBetInfo = async (
-  betId: number,
+  betId: string,
   provider: StateProviderT,
   contractAddress: string | undefined
 ) => {
@@ -169,7 +186,7 @@ export const fetchBetInfo = async (
     const betCzar = getReadContractInstance(provider!, contractAddress!);
     const res = await betCzar.bets(betId);
     //we extract the info and populate betInfo
-    betInfo.betId = betId.toString();
+    betInfo.betId = betId;
     betInfo.bettor1 = res.bettor1;
     betInfo.bettor2 = res.bettor2;
     betInfo.judge = res.judge;

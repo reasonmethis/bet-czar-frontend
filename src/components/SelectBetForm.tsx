@@ -36,9 +36,12 @@ const validate = (
 
 export const SelectBetForm = (props: SelectBetFormPropsT) => {
   const [showErrs, setShowErrs] = useState(false);
+  const initValues: SelectBetFormValsT = props.initVal
+    ? { betId: props.initVal }
+    : SelectBetFormInitVals;
   return (
     <Formik<SelectBetFormValsT>
-      initialValues={SelectBetFormInitVals}
+      initialValues={initValues}
       validate={validate}
       onSubmit={(values, actions) => {
         props.onSubmit(values);
@@ -55,7 +58,11 @@ export const SelectBetForm = (props: SelectBetFormPropsT) => {
             formik.handleSubmit(e);
           }}
         >
-          <Typography variant="subtitle1" textAlign="center" marginBottom="16px">
+          <Typography
+            variant="subtitle1"
+            textAlign="center"
+            marginBottom="16px"
+          >
             Please select the Bet Id
           </Typography>
           <Stack gap="0px">

@@ -33,7 +33,7 @@ import { styled } from "@mui/material/styles"; //VS code suggests from "@mui/mat
 
 import { useLocalStorage } from "usehooks-ts";
 import { navigationLinks } from "../constants";
-import { IState } from "../StateReducer";
+import { StateT } from "../StateReducer";
 import { roundAmt, shortenHash } from "../utils/utils";
 import { NoWalletMsg } from "./NoWalletMsg";
 
@@ -92,7 +92,7 @@ const NavLink = styled(RRLink)(linkStyles);
 const NavExternalLink = styled("a")(linkStyles);
 
 type HeaderPropsT = {
-  state: IState;
+  state: StateT;
   connectWallet: (isFake: boolean) => Promise<void>;
 };
 
@@ -210,35 +210,35 @@ export default function NavNormalAndHamburger({
               </Toolbar>
             </Container>
             <Hidden smUp>
-            <SwipeableDrawer
-              anchor="right"
-              open={open}
-              onOpen={() => setOpen(true)}
-              onClose={() => setOpen(false)}
-            >
-              <div
-                onClick={() => setOpen(false)}
-                onKeyPress={() => setOpen(false)}
-                role="button"
-                tabIndex={0}
+              <SwipeableDrawer
+                anchor="right"
+                open={open}
+                onOpen={() => setOpen(true)}
+                onClose={() => setOpen(false)}
               >
-                <IconButton>
-                  <ChevronRightIcon />
-                </IconButton>
-              </div>
-              <Divider />
-              <List>
-                {navigationLinks.map((item) => (
-                  <ListItem key={item.name}>
-                    <SmartNavLink
-                      name={item.name}
-                      href={item.href}
-                      isMobileNav={true}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </SwipeableDrawer>
+                <div
+                  onClick={() => setOpen(false)}
+                  onKeyPress={() => setOpen(false)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <IconButton>
+                    <ChevronRightIcon />
+                  </IconButton>
+                </div>
+                <Divider />
+                <List>
+                  {navigationLinks.map((item) => (
+                    <ListItem key={item.name}>
+                      <SmartNavLink
+                        name={item.name}
+                        href={item.href}
+                        isMobileNav={true}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </SwipeableDrawer>
             </Hidden>
           </AppBar>
         </ThemeProvider>

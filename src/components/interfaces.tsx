@@ -1,4 +1,4 @@
-import { IState } from "../StateReducer";
+import { DispatchStateT, StateT } from "../StateReducer";
 
 export const CreateBetFormInitVals = {
   bettor1: "",
@@ -21,7 +21,8 @@ export type DepositValsT = {
 };
 
 export type DepositPropsT = {
-  state: IState;
+  state: StateT;
+  dispatchState: DispatchStateT
   onSubmit: (vals: DepositValsT) => void;
 };
 
@@ -33,7 +34,8 @@ export type WithdrawValsT = {
 };
 
 export type WithdrawPropsT = {
-  state: IState;
+  state: StateT;
+  dispatchState: DispatchStateT
   onSubmit: (vals: WithdrawValsT) => void;
 };
 
@@ -44,7 +46,8 @@ export type JudgeValsT = {
 };
 
 export type JudgePropsT = {
-  state: IState;
+  state: StateT;
+  dispatchState: DispatchStateT
   onSubmit: (vals: JudgeValsT) => void;
 };
 
@@ -55,15 +58,16 @@ export type SelectBetFormValsT = typeof SelectBetFormInitVals;
 
 export type SelectBetFormPropsT = {
   isDisabled: boolean;
+  initVal?: string;
   onSubmit: (vals: SelectBetFormValsT) => void;
 };
 
 //export type AllBetsT = ethers.Event[][];
 export type AllBetsT = {
-  statusesFetched: boolean,
-  betIdsForRoles: string[][],
-  betInfoMap: Map<string, BetInfoT>
-}
+  statusesFetched: boolean;
+  betIdsForRoles: string[][];
+  betInfoMap: Map<string, BetInfoT>;
+};
 
 export const betStatusDescriptions = [
   "Awaiting Bettors' deposits",
@@ -117,9 +121,9 @@ export const RpcCallErrorInitVals = {
 
 export type RpcCallErrorT = typeof RpcCallErrorInitVals;
 export type BetHistoryEntryT = {
-  blockNumber: number,
-  status: BetStatus
-}
+  blockNumber: number;
+  status: BetStatus;
+};
 
 const tmp = {
   betId: "",

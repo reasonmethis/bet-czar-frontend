@@ -38,6 +38,11 @@ export const DUR_SNACKBAR_TX = 120000;
 export const txCodes = [
   { code: "ACTION_REJECTED", userMsg: "Tx rejected by user", level: "info" },
   {
+    code: "CALL_EXCEPTION",
+    userMsg: "Contract reverted execution",
+    level: "error",
+  },
+  {
     code: "INSUFFICIENT_FUNDS",
     userMsg: "Insufficient balance for tx",
     level: "error",

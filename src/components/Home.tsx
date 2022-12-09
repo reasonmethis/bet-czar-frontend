@@ -9,7 +9,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 
 import BarChartIcon from "@mui/icons-material/BarChart";
 
-import { StateBundleT } from "../StateReducer";
+import { Action, StateBundleT } from "../StateReducer";
 
 import BetInformation from "./BetInformation";
 import { BetInfoT, BetStatus, betStatusDescriptions } from "./interfaces";
@@ -27,11 +27,11 @@ export async function homeLoader(): Promise<HomeLoaderData> {
   };
 }
 type OneBetPropsT = {
-  //event: ethers.Event;
+  sstate: StateBundleT
   betInfo: BetInfoT;
 };
 type BetListPropsT = {
-  //events: ethers.Event[];
+  sstate: StateBundleT
   betInfos: BetInfoT[];
 };
 
@@ -39,7 +39,7 @@ type HomePropsT = {
   sstate: StateBundleT;
 };
 
-const OneBet = ({ betInfo }: OneBetPropsT) => {
+const OneBet = ({ betInfo, sstate }: OneBetPropsT) => {
   const [expanded, setExpanded] = useState(false);
 
   const handleChange = (
@@ -47,6 +47,8 @@ const OneBet = ({ betInfo }: OneBetPropsT) => {
     isExpanded: boolean
   ) => {
     setExpanded(isExpanded);
+    //whatever bet user clicks becomes cur bet oi
+    sstate.dispatch({type: Action.SET_BET_ID_OI, payload: betInfo.betId})
   };
   //if (!event.args!) return <div>Corrupted bet</div>;
 
@@ -89,7 +91,7 @@ const OneBet = ({ betInfo }: OneBetPropsT) => {
   );
 };
 
-const BetList = ({ betInfos }: BetListPropsT) => {
+const BetList = ({ betInfos, sstate}: BetListPropsT) => {
   return betInfos.length === 0 ? (
     <>
       <Typography variant="body2" color="text.secondary">
@@ -100,7 +102,7 @@ const BetList = ({ betInfos }: BetListPropsT) => {
   ) : (
     <>
       {betInfos.map((betInfo) => (
-        <OneBet key={betInfo.betId} betInfo={betInfo}></OneBet>
+        <OneBet key={betInfo.betId} betInfo={betInfo} sstate={sstate}></OneBet>
       ))}
       <Box sx={{ marginBottom: "8px" }}></Box>
     </>
@@ -140,7 +142,7 @@ export const Home = ({ sstate }: HomePropsT) => {
               Fetching...
             </Typography>
           ) : (
-            <BetList betInfos={betInfosForRoles[0]}></BetList>
+            <BetList sstate={sstate} betInfos={betInfosForRoles[0]}></BetList>
           )}
 
           <Typography variant="subtitle1" gutterBottom>
@@ -151,7 +153,7 @@ export const Home = ({ sstate }: HomePropsT) => {
               Fetching...
             </Typography>
           ) : (
-            <BetList betInfos={betInfosForRoles[1]}></BetList>
+            <BetList sstate={sstate} betInfos={betInfosForRoles[1]}></BetList>
           )}
 
           <Typography variant="subtitle1" gutterBottom>
@@ -162,7 +164,7 @@ export const Home = ({ sstate }: HomePropsT) => {
               Fetching...
             </Typography>
           ) : (
-            <BetList betInfos={betInfosForRoles[2]}></BetList>
+            <BetList sstate={sstate} betInfos={betInfosForRoles[2]}></BetList>
           )}
         </>
       )}

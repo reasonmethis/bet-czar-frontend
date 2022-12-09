@@ -1,7 +1,10 @@
 import { ethers } from "ethers";
 import { AllBetsT } from "./components/interfaces";
 
-export type StateProviderT = ethers.providers.Web3Provider | ethers.providers.BaseProvider | undefined
+export type StateProviderT =
+  | ethers.providers.Web3Provider
+  | ethers.providers.BaseProvider
+  | undefined;
 
 export enum Action {
   RESET,
@@ -15,6 +18,7 @@ export enum Action {
   SET_ALL_BETS,
   SET_WELCOME_STATE,
   WELCOME_MSG_DISMISSED,
+  SET_BET_ID_OI,
 }
 
 //Different actions have different payload types, so to strongly type
@@ -33,13 +37,15 @@ type TActionSetStringProperty = {
     | Action.SET_BALANCE
     | Action.SET_TX_BEINGSENT
     | Action.SET_TX_ERR
-    | Action.SET_WELCOME_STATE;
+    | Action.SET_WELCOME_STATE
+    | Action.SET_BET_ID_OI;
+
   payload: string | undefined;
 };
 
 type TActionSetProvider = {
   type: Action.SET_PROVIDER;
-  payload: StateProviderT
+  payload: StateProviderT;
 };
 
 type TActionSetAllBets = {
@@ -53,19 +59,20 @@ export type TAction =
   | TActionSetProvider
   | TActionSetAllBets;
 
-export interface IState {
+export type StateT = {
   balance: string | undefined;
   address: string | undefined;
   contractAddress: string | undefined;
   networkError: string | undefined;
-  provider:StateProviderT
+  provider: StateProviderT;
   txBeingSent: string | undefined;
   txError: string | undefined;
   allBets: AllBetsT | undefined;
   welcomeState: string;
-}
+  betIdOI: string | undefined;
+};
 
-export const stateInit: IState = {
+export const stateInit: StateT = {
   balance: undefined,
   address: undefined,
   contractAddress: undefined,
@@ -75,14 +82,19 @@ export const stateInit: IState = {
   txError: undefined,
   allBets: undefined,
   welcomeState: "SHW ",
+  betIdOI: undefined,
 };
+
+export type DispatchStateT = (x: TAction) => void;
 
 export type StateBundleT = {
-  val: IState;
-  dispatch: (x: TAction) => void;
+  val: StateT;
+  dispatch: DispatchStateT;
 };
 
-export const stateReducer = (state: IState, action: TAction): IState => {
+export const stateReducer = (state: StateT, action: TAction): StateT => {
+  console.log("statereducer: action payload ", (action as any).payload);
+  //return state
   switch (action.type) {
     case Action.RESET:
       return { ...stateInit, welcomeState: state.welcomeState };
@@ -105,7 +117,12 @@ export const stateReducer = (state: IState, action: TAction): IState => {
     case Action.SET_WELCOME_STATE:
       return { ...state, welcomeState: action.payload ?? "" };
     case Action.WELCOME_MSG_DISMISSED:
-      return { ...state, welcomeState: state.welcomeState.replace("SHW", "DSM")};
+      return {
+        ...state,
+        welcomeState: state.welcomeState.replace("SHW", "DSM"),
+      };
+    case Action.SET_BET_ID_OI:
+      return { ...state, betIdOI: action.payload };
     default:
       return state;
   }
