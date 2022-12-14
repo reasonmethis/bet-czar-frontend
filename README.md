@@ -95,5 +95,5 @@ You can now create a test Bet:
 
 Your first Bet is now on the blockchain! You can now explore the other sections of Bet Czar. Start by going to the Home section to see your new Bet on your Dashboard. In particular you will see your **Bet Id**. You can now go to the other sections and use the Bet Id to perform actions such as depositing wagers, adjudicating the outcome (you made yourself the Judge, remember?), and withdrawing. Happy betting!
 
-[working demo]: https://reasonmethis.github.io/betczar_frontend
+[working demo]: https://reasonmethis.github.io/bet-czar-frontend/
 [faucet]: https://goerli-faucet.pk910.de
