@@ -1,6 +1,6 @@
 {
-  "name": "betczar_frontend",
-  "homepage": "https://reasonmethis.github.io/betczar_frontend",
+  "name": "bet-czar-frontend",
+  "homepage": "https://reasonmethis.github.io/bet-czar-frontend",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

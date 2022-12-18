@@ -59,9 +59,7 @@ enum FetchingState {
 
 function App() {
   const [state, dispatchState] = useReducer(stateReducer, stateInit);
-  //const pollDataIntervalRef = useRef<NodeJS.Timer | undefined>();
   const fetchingFlgRef = useRef(FetchingState.FETCHING_OFF);
-  //const [fetchingFlg, setFetchingFlg] = useState(FetchingState.NOT_FETCHING);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   useInterval( //https://overreacted.io/making-setinterval-declarative-with-react-hooks/
     periodicInfoFetch,
@@ -436,14 +434,6 @@ function App() {
   );
   //We render the Dapp
   return <RouterProvider router={router} />;
-  /*if (!window.ethereum) {
-    return (
-      <>
-        <Header />
-        <NoWallet />
-      </>
-    );
-  } */
 }
 
 export default App;

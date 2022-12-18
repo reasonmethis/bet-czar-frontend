@@ -55,9 +55,6 @@ const validate = (
 
 export const CreateBetForm = (props: CreateBetFormPropsT) => {
   const [showErrs, setShowErrs] = useState(false);
-  /*Seems to work without specifying type.
-  Also, is this the right type? 
-  See resetForm entry in https://formik.org/docs/api/formik#onsubmit-values-values-formikbag-formikbag--void--promiseany */
   return (<>
     <PageHeading text="New Bet Creation"></PageHeading>
     <Formik<CreateBetFormValsT>

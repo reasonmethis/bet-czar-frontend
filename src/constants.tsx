@@ -1,4 +1,4 @@
-const BASE_ROUTE = "betczar_frontend";
+const BASE_ROUTE = "bet-czar-frontend";
 export const ROUTE_PREFIX = "/" + BASE_ROUTE;
 export const MAIN_ROUTE = BASE_ROUTE ? BASE_ROUTE : "/";
 export const navigationLinks = [
@@ -9,7 +9,7 @@ export const navigationLinks = [
   { name: "Judge", href: ROUTE_PREFIX + "/judge" },
   {
     name: "Docs",
-    href: "https://github.com/reasonmethis/betczar_frontend/blob/master/README.md",
+    href: "https://github.com/reasonmethis/bet-czar-frontend/blob/master/README.md",
   },
 ];
 // Here's a list of network ids https://docs.metamask.io/guide/ethereum-provider.html#properties
@@ -73,7 +73,7 @@ export const welcomeMsgs = {
     [
       "S:How do I use Bet Czar?",
       "N: You can explore its full functionality with free test tokens. The ",
-      "L:Docs ##https://github.com/reasonmethis/betczar_frontend/blob/master/README.md",
+      "L:Docs ##https://github.com/reasonmethis/bet-czar-frontend/blob/master/README.md",
       " walk you through that step by step.",
     ],
     [
@@ -81,7 +81,7 @@ export const welcomeMsgs = {
       "N: No, the contract code (",
       "L:verified ##https://goerli.etherscan.io/address/0x497ff2D9CC6674b64e1619c87468EFE8692F0353#code",
       'N:) is built with no "superuser", only the bet participants can withdraw the money. The ',
-      "L:Docs ##https://github.com/reasonmethis/betczar_frontend/blob/master/README.md",
+      "L:Docs ##https://github.com/reasonmethis/bet-czar-frontend/blob/master/README.md",
       " have more information about this as well.",
     ],
   ],
@@ -103,8 +103,8 @@ export const connectBtnMsgs = {
       "S:And then?",
       'N: You can then collect some free "fake" crypto from a ',
       "L:faucet ##https://goerli-faucet.pk910.de",
-      'N: and you will be ready to fully test out Bet Czar. If you are new to crypto, this might be confusing, but don\'t worry, the ',
-      "L:Docs ##https://github.com/reasonmethis/betczar_frontend/blob/master/README.md",
+      "N: and you will be ready to fully test out Bet Czar. If you are new to crypto, this might be confusing, but don't worry, the ",
+      "L:Docs ##https://github.com/reasonmethis/bet-czar-frontend/blob/master/README.md",
       " walk you through that step by step.",
     ],
     [
