@@ -17,7 +17,7 @@ Bet Czar is a decentralized application (dapp), which uses the blockchain to cre
 
 **Can Bet Czar steal our money?** No, the contract is built with no "superuser", only the bet participants can withdraw the money in the escrow. Unlike some well-known recent cases (ahem... FTX), the contract doesn't allow for users' deposits to be lent out or used for anything else. The funds just sit there, waiting for the winner to be registered, at which point they automatically become available for withdrawal by the winner.
 
-This next bit is a tad too technical for the supposedly _non-technical_ introduction but important for completeness (feel free to ignore it if it doesn't make sense): the contract code can be examined, it is [verified](https://goerli.etherscan.io/address/0x497ff2D9CC6674b64e1619c87468EFE8692F0353#code) on Etherscan. As with any dapp, when you use it, your wallet will show you which contract you are interacting with, so that you don't need to just blindly trust that the front-end is indeed hooked up to the right contract.
+This next bit is a tad too technical for the supposedly *non-technical* introduction but important for completeness (feel free to ignore it if it doesn't make sense): the contract code can be examined, it is [verified](https://goerli.etherscan.io/address/0x497ff2D9CC6674b64e1619c87468EFE8692F0353#code) on Etherscan. As with any dapp, when you use it, your wallet will show you which contract you are interacting with, so that you don't need to just blindly trust that the front-end is indeed hooked up to the right contract. For more technical notes on security, check [here](https://github.com/reasonmethis/bet-czar-contract-solidity/blob/master/README.md).
 
 ## Quick Start
 
